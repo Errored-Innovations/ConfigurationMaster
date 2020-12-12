@@ -118,8 +118,11 @@ public abstract class ConfigurationMaster {
             if (sentence.length() + word.length() > getMaxTitleWidth()) {
                 lines.add("# " + align(sentence, position) + " #");
                 sentence = new StringBuilder();
+                sentence.append(word.substring(1));
+            } else {
+                sentence.append(word);
             }
-            sentence.append(word.substring(1));
+
         }
 
         if (sentence.length() > 0) {
