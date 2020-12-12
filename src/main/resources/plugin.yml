@@ -2,3 +2,4 @@ main: io.github.thatsmusic99.configurationmaster.CoreClass
 name: ConfigurationMaster
 version: 1.0-SNAPSHOT
 author: Thatsmusic99
+api-version: 1.13
