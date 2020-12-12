@@ -5,10 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * ConfigurationMaster
@@ -25,14 +22,22 @@ public abstract class ConfigurationMaster {
     private List<String> currentLines;
     private HashMap<String, String> sections;
     private List<String> nodeOrder;
+    private final boolean isNew;
+    private List<String> pendingComments;
+    private Plugin plugin;
 
     /**
      *
      * @param name
      */
-    public ConfigurationMaster(String name, Plugin plugin) {
+    public ConfigurationMaster(Plugin plugin, String name) {
+        this(plugin, plugin.getDataFolder(), name);
+    }
+
+    public ConfigurationMaster(Plugin plugin, File folder, String name) {
+        this.plugin = plugin;
         // Creates the config file object
-        configFile = new File(plugin.getDataFolder(), name + ".yml");
+        configFile = new File(folder, name + ".yml");
         // If it doesn't exist though, create it
         if (!configFile.exists()) {
             try {
@@ -43,11 +48,13 @@ public abstract class ConfigurationMaster {
         }
         //
         config = YamlConfiguration.loadConfiguration(configFile);
+        isNew = config.saveToString().isEmpty();
         tempConfig = new YamlConfiguration();
         currentLines = new ArrayList<>();
         comments = new HashMap<>();
         nodeOrder = new ArrayList<>();
         sections = new HashMap<>();
+        pendingComments = new ArrayList<>();
 
         loadDefaults();
         moveToNew();
@@ -55,31 +62,147 @@ public abstract class ConfigurationMaster {
         save(true);
         postSave();
         loadTitle();
-        writeSections();
+        //    writeSections();
         writeComments();
         save(false);
 
     }
 
     public void loadTitle() {
-        List<String> title = new ArrayList<>(Arrays.asList(
-                "################################################################################",
-                "#                         -<( Advanced Teleport )>-                            #",
-                "#                                    - Made by Niestrat99 and Thatsmusic99     #",
-                "#                                                                              #",
-                "################################################################################",
-                "#  A rapidly growing teleportation plugin looking to break the boundaries of   #",
-                "#  traditional teleport plugins.                                               #",
-                "#                                                                              #",
-                "#  Spigot page - https://www.spigotmc.org/resources/advanced-teleport.64139/   #",
-                "#  Wiki - https://github.com/Niestrat99/AT-Rewritten/wiki                      #",
-                "#  Discord - https://discord.gg/mgWbbN4                                        #",
-                "################################################################################"
+        List<String> title = new ArrayList<>();
+        // Get the breaking line.
+        StringBuilder breakingLineSB = new StringBuilder();
+        for (int i = 0; i < getMaxTitleWidth() + 4; i++) {
+            breakingLineSB.append("#");
+        }
+        String breakingLine = breakingLineSB.toString();
 
-        ));
+        // Get an empty line.
+        StringBuilder emptyLineSB = new StringBuilder();
+        emptyLineSB.append("# ");
+        for (int i = 0; i < getMaxTitleWidth(); i++) {
+            emptyLineSB.append(" ");
+        }
+        emptyLineSB.append(" #");
+        String emptyLine = emptyLineSB.toString();
+
+        title.add(breakingLine);
+        title.addAll(formatStr(getTitle(), Pos.CENTER));
+        title.addAll(formatStr(getSubtitle(), Pos.CENTER));
+        title.add(emptyLine);
+        title.add(breakingLine);
+        if (getDescription() != null || !getExternalLinks().isEmpty()) {
+            title.addAll(formatStr(getDescription(), Pos.LEFT));
+            title.add(emptyLine);
+            for (String link : getExternalLinks().keySet()) {
+                title.add(formatStr(link + getLinkSeparator() + getExternalLinks().get(link), Pos.LEFT).get(0));
+            }
+            title.add(breakingLine);
+        }
+
+
         for (int i = 0; i < title.size(); i++) {
             currentLines.add(i, title.get(i));
         }
+    }
+
+    private List<String> formatStr(String str, Pos position) {
+        List<String> lines = new ArrayList<>();
+        if (str == null) return lines;
+        String[] words = str.split(" ");
+        StringBuilder sentence = new StringBuilder();
+        for (String word : words) {
+            if (sentence.length() > 0) {
+                word = " " + word;
+            }
+            if (sentence.length() + word.length() > getMaxTitleWidth()) {
+                lines.add("# " + align(sentence, position) + " #");
+                sentence = new StringBuilder();
+            } else {
+                sentence.append(word);
+            }
+        }
+
+        if (sentence.length() > 0) {
+            lines.add("# " + align(sentence, position) + " #");
+        }
+
+        return lines;
+    }
+
+    private String align(StringBuilder str, Pos position) {
+        int remainder = getMaxTitleWidth() - str.length();
+        switch (position) {
+            case LEFT:
+                for (int i = 0; i < remainder; i++) {
+                    str.append(" ");
+                }
+                break;
+            case CENTER:
+                for (int i = 0; i < remainder / 2; i++) {
+                    str.insert(0, " ");
+                }
+                if (remainder % 2 == 1) {
+                    remainder++;
+                }
+                for (int i = 0; i < remainder / 2; i++) {
+                    str.append(" ");
+                }
+                break;
+            case RIGHT:
+                for (int i = 0; i < remainder; i++) {
+                    str.insert(0, " ");
+                }
+                break;
+        }
+        return str.toString();
+    }
+
+
+    public int getMaxTitleWidth() {
+        if (getExternalLinks().isEmpty()) {
+            return 75;
+        } else {
+            int maxWidth = 75;
+            for (String key : getExternalLinks().keySet()) {
+                int currentWidth = key.length() + getLinkSeparator().length() + getExternalLinks().get(key).length();
+                if (currentWidth > maxWidth) {
+                    maxWidth = currentWidth;
+                }
+            }
+            return maxWidth;
+        }
+    }
+
+    public String getTitle() {
+        return "-<( " + plugin.getName() + " )>-";
+    }
+
+    public String getLinkSeparator() {
+        return " - ";
+    }
+
+    public String getSubtitle() {
+        StringBuilder authors = new StringBuilder();
+        List<String> authorsRaw = plugin.getDescription().getAuthors();
+        for (int i = 0; i < authorsRaw.size(); i++) {
+            String author = authorsRaw.get(i);
+            authors.append(author);
+            if (i < authorsRaw.size() - 2) {
+                authors.append(", ");
+            } else if (i == authorsRaw.size() - 2) {
+                authors.append(" and ");
+            }
+        }
+        return "Made by " + authors.toString();
+    }
+
+    public String getDescription() {
+        return plugin.getDescription().getDescription();
+    }
+
+    public HashMap<String, String> getExternalLinks() {
+        return new HashMap<>();
     }
 
     public abstract void loadDefaults();
@@ -90,10 +213,28 @@ public abstract class ConfigurationMaster {
         nodeOrder.add(path);
     }
 
+    public void addExample(String path, Object value) {
+        if (isNew) {
+            addDefault(path, value);
+        }
+    }
+
+    public void addExample(String path, Object value, String comment) {
+        if (isNew) {
+            addDefault(path, value);
+            addComment(path, comment);
+        }
+    }
+
+    public void set(String path, Object value) {
+        config.set(path, value);
+        tempConfig.set(path, config.get(path));
+    }
+
     public void addDefault(String path, Object value, String section, String comment) {
         addDefault(path, value);
+        addSection(section);
         addComment(path, comment);
-        addSection(path, section);
     }
 
     public void addDefault(String path, Object value, String comment) {
@@ -101,8 +242,18 @@ public abstract class ConfigurationMaster {
         addComment(path, comment);
     }
 
+    public void addComment(String comment) {
+        pendingComments.add(comment);
+    }
+
     public void addComment(String path, String comment) {
-        comments.put(path, comment);
+        StringBuilder builder = new StringBuilder();
+        for (String str : pendingComments) {
+            builder.append(str).append("\n\n");
+        }
+        pendingComments.clear();
+        builder.append(comment);
+        comments.put(path, builder.toString());
     }
 
     public void addSection(String beforePath, String section) {
@@ -110,14 +261,8 @@ public abstract class ConfigurationMaster {
     }
 
     public void addSection(String section) {
-        int size = nodeOrder.size();
-        sections.put(null, section);
+        pendingComments.add("CONFIG_SECTION: " + section);
     }
-
-    public void addSectionWithComment(String section, String comment) {
-
-    }
-
 
     public abstract void postSave();
 
@@ -141,6 +286,30 @@ public abstract class ConfigurationMaster {
 
             writeComment(path, divisions, 0, 0);
         }
+
+        for (String str : pendingComments) {
+            if (str.isEmpty()) {
+                currentLines.add("");
+            } else {
+                currentLines.add("");
+                if (str.startsWith("CONFIG_SECTION: ")) {
+                    String section = str.split(": ")[1];
+                    StringBuilder length = new StringBuilder();
+                    length.append("###");
+                    for (int j = 0; j < section.length(); j++) {
+                        length.append("#");
+                    }
+                    length.append("###");
+                    currentLines.add(length.toString());
+                    currentLines.add("#  " + section + "  #");
+                    currentLines.add(length.toString());
+                    currentLines.add("");
+                } else {
+                    currentLines.add("# " + str);
+                }
+
+            }
+        }
     }
 
     private void writeComment(String path, String[] divisions, int iteration, int startingLine) {
@@ -153,8 +322,8 @@ public abstract class ConfigurationMaster {
             String line = currentLines.get(i);
             if (!line.startsWith(indent.toString())) return;
             if (line.startsWith("#")) continue;
-            if (line.startsWith(indent.toString() + divisions[iteration]) ||
-                    line.startsWith(indent.toString() + "'" + divisions[iteration] + "'")) {
+            if (line.startsWith(indent.toString() + divisions[iteration] + ":") ||
+                    line.startsWith(indent.toString() + "'" + divisions[iteration] + "':")) {
                 iteration += 1;
                 if (iteration == divisions.length) {
                     int currentLine = i;
@@ -164,35 +333,32 @@ public abstract class ConfigurationMaster {
                     }
                     String[] rawComment = comments.get(path).split("\n");
                     for (String commentPart : rawComment) {
-                        currentLines.add(currentLine, indent + "# " + commentPart);
+                        if (commentPart.isEmpty()) {
+                            currentLines.add(currentLine, "");
+                        } else {
+                            if (commentPart.startsWith("CONFIG_SECTION: ")) {
+                                String section = commentPart.split(": ")[1];
+                                StringBuilder length = new StringBuilder();
+                                length.append("###");
+                                for (int j = 0; j < section.length(); j++) {
+                                    length.append("#");
+                                }
+                                length.append("###");
+                                currentLines.add(currentLine, length.toString());
+                                currentLines.add(currentLine, "#  " + section + "  #");
+                                currentLines.add(currentLine, length.toString());
+                                currentLine += 3;
+                                continue;
+                            } else {
+                                currentLines.add(currentLine, indent + "# " + commentPart);
+                            }
+
+                        }
                         currentLine++;
                     }
                     break;
                 } else {
                     writeComment(path, divisions, iteration, i + 1);
-                }
-            }
-        }
-    }
-
-    public void writeSections() {
-        // For each path the section is to be written above...
-        for (String path : sections.keySet()) {
-            // For each line in the file currently...
-            for (int i = 0; i < currentLines.size(); i++) {
-                if (currentLines.get(i).startsWith(path)) {
-                    String section = sections.get(path);
-                    StringBuilder length = new StringBuilder();
-                    length.append("###");
-                    for (int j = 0; j < section.length(); j++) {
-                        length.append("#");
-                    }
-                    length.append("###");
-                    currentLines.add(i, length.toString());
-                    currentLines.add(i, "#  " + section + "  #");
-                    currentLines.add(i, length.toString());
-                    currentLines.add(i, "");
-                    break;
                 }
             }
         }
@@ -225,5 +391,11 @@ public abstract class ConfigurationMaster {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public enum Pos {
+        RIGHT,
+        CENTER,
+        LEFT
     }
 }
