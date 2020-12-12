@@ -3,7 +3,6 @@ package io.github.thatsmusic99.configurationmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import org.yaml.snakeyaml.scanner.ScannerException;
 
 import java.io.*;
 import java.util.*;
@@ -49,7 +48,8 @@ public abstract class ConfigurationMaster {
         }
         //
         try {
-            config = YamlConfiguration.loadConfiguration(configFile);
+            config = new YamlConfiguration();
+            config.load(configFile);
         } catch (Exception ex) {
             plugin.getLogger().warning("Could not read " + name + ".yml:");
             plugin.getLogger().warning(ex.getMessage());
