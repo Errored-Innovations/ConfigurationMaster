@@ -50,7 +50,7 @@ public abstract class ConfigurationMaster {
         //
         try {
             config = YamlConfiguration.loadConfiguration(configFile);
-        } catch (ScannerException ex) {
+        } catch (Exception ex) {
             plugin.getLogger().warning("Could not read " + name + ".yml:");
             plugin.getLogger().warning(ex.getMessage());
             plugin.getLogger().warning("The faulty configuration has been renamed to " + name + "-errored.yml.");
