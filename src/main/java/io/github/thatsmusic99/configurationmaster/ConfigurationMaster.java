@@ -3,6 +3,7 @@ package io.github.thatsmusic99.configurationmaster;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 import java.io.*;
 import java.util.*;
@@ -47,7 +48,17 @@ public abstract class ConfigurationMaster {
             }
         }
         //
-        config = YamlConfiguration.loadConfiguration(configFile);
+        try {
+            config = YamlConfiguration.loadConfiguration(configFile);
+        } catch (ScannerException ex) {
+            plugin.getLogger().warning("Could not read " + name + ".yml:");
+            plugin.getLogger().warning(ex.getMessage());
+            plugin.getLogger().warning("The faulty configuration has been renamed to " + name + "-errored.yml.");
+            configFile.renameTo(new File(folder, name + "-errored.yml"));
+            plugin.getLogger().warning("Please use http://yaml-online-parser.appspot.com/ to correct the problems in the file.");
+            plugin.getLogger().warning("If you are unsure on what to do, please contact the developers of this plugin.");
+        }
+
         isNew = config.saveToString().isEmpty();
         tempConfig = new YamlConfiguration();
         currentLines = new ArrayList<>();
