@@ -22,9 +22,11 @@ public abstract class CMFile {
     private List<String> currentLines;
     private HashMap<String, String> sections;
     private List<String> nodeOrder;
-    private final boolean isNew;
+    private boolean isNew;
     private List<String> pendingComments;
     private Plugin plugin;
+    private File folder;
+    private String name;
 
     /**
      *
@@ -36,6 +38,16 @@ public abstract class CMFile {
 
     public CMFile(Plugin plugin, File folder, String name) {
         this.plugin = plugin;
+        this.folder = folder;
+        this.name = name;
+        load();
+    }
+
+    public void reload() {
+        load();
+    }
+
+    private void load() {
         // Creates the config file object
         configFile = new File(folder, name + ".yml");
         // If it doesn't exist though, create it
@@ -73,10 +85,8 @@ public abstract class CMFile {
         save(true);
         postSave();
         loadTitle();
-        //    writeSections();
         writeComments();
         save(false);
-
     }
 
     public void loadTitle() {
