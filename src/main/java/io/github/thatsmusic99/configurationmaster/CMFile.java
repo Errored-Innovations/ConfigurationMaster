@@ -362,7 +362,7 @@ public abstract class CMFile {
         pendingComments.add("CONFIG_SECTION: " + section);
     }
 
-    public abstract void postSave();
+    public void postSave() {}
 
     public void moveToNew() {}
 
