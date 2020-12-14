@@ -292,9 +292,11 @@ public abstract class CMFile {
     public void moveToNew() {}
 
     public void moveTo(String oldPath, String newPath) {
-        Object object = config.get(oldPath);
-        config.set(newPath, object);
-        config.set(oldPath, null);
+        if (config.contains(oldPath)) {
+            Object object = config.get(oldPath);
+            config.set(newPath, object);
+            config.set(oldPath, null);
+        }
     }
 
     public FileConfiguration getConfig() {
