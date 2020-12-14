@@ -12,37 +12,67 @@ import java.util.*;
  *
  * This makes it easier to update and manage configurations.
  * It includes commenting and a title, all updated dynamically.
+ * 
+ * @author Thatsmusic99 (Holly)
  */
 public abstract class CMFile {
 
+    // The actual configuration file.
     private FileConfiguration config;
+    // The temporary config file that is used to order nodes.
     private FileConfiguration tempConfig;
+    // The file object for the config.
     private File configFile;
+    // Comments to be written above the provided options.
     private HashMap<String, String> comments;
+    // The currently written lines of the file.
     private List<String> currentLines;
+    // TODO: Remove
+    @Deprecated
     private HashMap<String, String> sections;
+    // TODO: Maybe remove
+    @Deprecated
     private List<String> nodeOrder;
+    // If the file is newly generated or not.
     private boolean isNew;
+    // Comments pending to be added.
     private List<String> pendingComments;
+    // The plugin using the utility.
     private Plugin plugin;
+    // The folder that the config is to be stored in.
     private File folder;
+    // The name of the config file.
     private String name;
 
     /**
-     *
-     * @param name
+     * Basic initialisation of the config file.
+     * This places the file inside the plugin's data folder.
+     * 
+     * @param plugin The plugin using the utility.
+     * @param name The name of the config.
      */
     public CMFile(Plugin plugin, String name) {
         this(plugin, plugin.getDataFolder(), name);
     }
 
+    /**
+     * Initialisation of the config file.
+     *
+     * @param plugin The plugin using the utility.
+     * @param folder The folder the configuration file is to be stored inside.
+     * @param name The name of the config file.
+     */
     public CMFile(Plugin plugin, File folder, String name) {
         this.plugin = plugin;
         this.folder = folder;
         this.name = name;
+        // Loads the config file.
         load();
     }
 
+    /**
+     * Reloads the config file.
+     */ 
     public void reload() {
         load();
     }
@@ -58,11 +88,12 @@ public abstract class CMFile {
                 ex.printStackTrace();
             }
         }
-        //
+        // Try to load the current options from the config file
         try {
             config = new YamlConfiguration();
             config.load(configFile);
         } catch (Exception ex) {
+            // Otherwise, rename it and warn the user
             plugin.getLogger().warning("Could not read " + name + ".yml:");
             plugin.getLogger().warning(ex.getMessage());
             plugin.getLogger().warning("The faulty configuration has been renamed to " + name + "-errored.yml.");
@@ -70,8 +101,9 @@ public abstract class CMFile {
             plugin.getLogger().warning("Please use http://yaml-online-parser.appspot.com/ to correct the problems in the file.");
             plugin.getLogger().warning("If you are unsure on what to do, please contact the developers of this plugin.");
         }
-
+        // If the config is empty, it's new
         isNew = config.saveToString().isEmpty();
+        // Create a new empty configuration.
         tempConfig = new YamlConfiguration();
         currentLines = new ArrayList<>();
         comments = new HashMap<>();
@@ -79,16 +111,27 @@ public abstract class CMFile {
         sections = new HashMap<>();
         pendingComments = new ArrayList<>();
 
+        // Get the plugin to load the default values of its config.
         loadDefaults();
+        // Move any old values to their new counterparts.
         moveToNew();
+        // Save the current default options.
         config.options().copyDefaults(true);
         save(true);
+        // Do anything the plugin requires to do following saving of a config file.
         postSave();
+        // Load the config title.
         loadTitle();
+        // Write all the comments.
         writeComments();
+        // Save the new comments.
         save(false);
     }
 
+    /**
+     * Loads the title of the config file.
+     * Can be overriden.
+     */
     public void loadTitle() {
         List<String> title = new ArrayList<>();
         // Get the breaking line.
@@ -106,12 +149,14 @@ public abstract class CMFile {
         }
         emptyLineSB.append(" #");
         String emptyLine = emptyLineSB.toString();
-
+        // Add the breaking line first.
         title.add(breakingLine);
+        // Add the title and subtitle.
         title.addAll(formatStr(getTitle(), Pos.CENTER));
         title.addAll(formatStr(getSubtitle(), Pos.CENTER));
         title.add(emptyLine);
         title.add(breakingLine);
+        // Add the description and external links.
         if (getDescription() != null || !getExternalLinks().isEmpty()) {
             title.addAll(formatStr(getDescription(), Pos.LEFT));
             title.add(emptyLine);
@@ -127,29 +172,47 @@ public abstract class CMFile {
         }
     }
 
+    /** 
+     * Used to align strings in a specific manner.
+     * Can also place them on separate lines.
+     */
     private List<String> formatStr(String str, Pos position) {
+        // The list of lines resulting from the aligned/split string.
         List<String> lines = new ArrayList<>();
+        // If the string is null, just return an empty list.
         if (str == null) return lines;
+        // Split up the line into words.
         String[] words = str.split(" ");
+        // Build up the sentence.
         StringBuilder sentence = new StringBuilder();
+        // For each word in the line...
         for (String word : words) {
+            // If the sentence is not empty...
             if (sentence.length() > 0) {
+                // Add a space in front of the word.
                 word = " " + word;
             }
+            // If the word added onto the sentence causes an overflow though...
             if (sentence.length() + word.length() > getMaxTitleWidth()) {
+                // Create the line.
                 lines.add("# " + align(sentence, position) + " #");
+                // Empty the sentence.
                 sentence = new StringBuilder();
+                // Add the word onto a new line.
                 sentence.append(word.substring(1));
             } else {
+                // Otherwise, add the word onto the sentence.
                 sentence.append(word);
             }
 
         }
 
+        // If, by the end of the list of words, there is still a sentence to be added...
         if (sentence.length() > 0) {
+            // Add it.
             lines.add("# " + align(sentence, position) + " #");
         }
-
+        // Return the title.
         return lines;
     }
 
@@ -182,13 +245,22 @@ public abstract class CMFile {
     }
 
 
+    /**
+     * The maximum width the title can go up to.
+     * If there are no external links, then 75 is returned by default.
+     * However, if there are external links, the title is expanded to hold it.
+     */
     public int getMaxTitleWidth() {
+        // If there are no external links, return 75.
         if (getExternalLinks().isEmpty()) {
             return 75;
         } else {
             int maxWidth = 75;
+            // For each external link...
             for (String key : getExternalLinks().keySet()) {
+                // The width of it is determined by the key length, the separator length and the link length.
                 int currentWidth = key.length() + getLinkSeparator().length() + getExternalLinks().get(key).length();
+                // If this is bigger than the current maximum width, update the maximum width.
                 if (currentWidth > maxWidth) {
                     maxWidth = currentWidth;
                 }
@@ -197,6 +269,9 @@ public abstract class CMFile {
         }
     }
 
+    /**
+     * The title used at the top of the config file.
+     */
     public String getTitle() {
         return "-<( " + plugin.getName() + " )>-";
     }
