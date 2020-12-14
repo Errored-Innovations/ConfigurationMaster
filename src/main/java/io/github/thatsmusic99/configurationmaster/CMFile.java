@@ -369,7 +369,7 @@ public abstract class CMFile {
     public void moveTo(String oldPath, String newPath) {
         if (config.contains(oldPath)) {
             Object object = config.get(oldPath);
-            config.set(newPath, object);
+            tempConfig.set(newPath, object);
             config.set(oldPath, null);
         }
     }
