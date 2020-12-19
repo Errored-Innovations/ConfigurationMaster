@@ -80,6 +80,10 @@ public abstract class CMFile {
     private void load() {
         // Creates the config file object
         configFile = new File(folder, name + ".yml");
+        // If the folder doesn't exist, create it
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
         // If it doesn't exist though, create it
         if (!configFile.exists()) {
             try {
