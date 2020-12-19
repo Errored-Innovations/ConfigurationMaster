@@ -130,6 +130,13 @@ public abstract class CMFile {
         writeComments();
         // Save the new comments.
         save(false);
+        // Load the new options into the config that may have been changed from
+        try {
+            config.load(configFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
