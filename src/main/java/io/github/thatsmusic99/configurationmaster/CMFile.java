@@ -66,8 +66,6 @@ public abstract class CMFile {
         this.plugin = plugin;
         this.folder = folder;
         this.name = name;
-        // Loads the config file.
-        load();
     }
 
     /**
@@ -77,7 +75,7 @@ public abstract class CMFile {
         load();
     }
 
-    private void load() {
+    public void load() {
         // Creates the config file object
         configFile = new File(folder, name + ".yml");
         // If the folder doesn't exist, create it
