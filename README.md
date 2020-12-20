@@ -26,7 +26,7 @@ To manage your dependencies, it is recommended to use either Maven or Gradle. In
         <dependency>
             <groupId>com.github.Thatsmusic99</groupId>
 	    <artifactId>ConfigurationMaster</artifactId>
-	    <version>v1.0-SNAPSHOT-5</version>
+	    <version>v1.0-BETA-1</version>
 	</dependency>
     </dependencies>
 ```
