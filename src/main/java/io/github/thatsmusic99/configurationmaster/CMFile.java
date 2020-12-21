@@ -734,6 +734,10 @@ public abstract class CMFile {
      * @param newPath the new path to be moved to.
      */
     public void moveTo(@NotNull String oldPath, @NotNull String newPath) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use moveTo within the moveToNew method.");
+        }
+        // If the option exists...
         if (config.contains(oldPath)) {
             Object object = config.get(oldPath);
             tempConfig.set(newPath, object);
