@@ -27,12 +27,6 @@ public abstract class CMFile {
     private HashMap<String, String> comments;
     // The currently written lines of the file.
     private List<String> currentLines;
-    // TODO: Remove
-    @Deprecated
-    private HashMap<String, String> sections;
-    // TODO: Maybe remove
-    @Deprecated
-    private List<String> nodeOrder;
     // If the file is newly generated or not.
     private boolean isNew;
     // Comments pending to be added.
@@ -43,6 +37,13 @@ public abstract class CMFile {
     private File folder;
     // The name of the config file.
     private String name;
+
+    private int defaultTitleWidth;
+    private String title;
+    private String subtitle;
+    private HashMap<String, String> externalLinks;
+    private String linkSeparator;
+    private String description;
 
     /**
      * Basic initialisation of the config file.
@@ -66,6 +67,26 @@ public abstract class CMFile {
         this.plugin = plugin;
         this.folder = folder;
         this.name = name;
+
+        defaultTitleWidth = 75;
+        title = "-<( " + plugin.getName() + " )>-";
+
+        StringBuilder authors = new StringBuilder();
+        List<String> authorsRaw = plugin.getDescription().getAuthors();
+        for (int i = 0; i < authorsRaw.size(); i++) {
+            String author = authorsRaw.get(i);
+            authors.append(author);
+            if (i < authorsRaw.size() - 2) {
+                authors.append(", ");
+            } else if (i == authorsRaw.size() - 2) {
+                authors.append(" and ");
+            }
+        }
+        subtitle = "Made by " + authors.toString();
+
+        externalLinks = new HashMap<>();
+        linkSeparator = " - ";
+        description = plugin.getDescription().getDescription();
     }
 
     /**
@@ -109,8 +130,6 @@ public abstract class CMFile {
         tempConfig = new YamlConfiguration();
         currentLines = new ArrayList<>();
         comments = new HashMap<>();
-        nodeOrder = new ArrayList<>();
-        sections = new HashMap<>();
         pendingComments = new ArrayList<>();
 
         // Get the plugin to load the default values of its config.
@@ -258,13 +277,15 @@ public abstract class CMFile {
      * The maximum width the title can go up to.
      * If there are no external links, then 75 is returned by default.
      * However, if there are external links, the title is expanded to hold it.
+     *
+     * @return The number of characters wide the title can be.
      */
     public int getMaxTitleWidth() {
         // If there are no external links, return 75.
         if (getExternalLinks().isEmpty()) {
-            return 75;
+            return getDefaultTitleWidth();
         } else {
-            int maxWidth = 75;
+            int maxWidth = getDefaultTitleWidth();
             // For each external link...
             for (String key : getExternalLinks().keySet()) {
                 // The width of it is determined by the key length, the separator length and the link length.
@@ -279,37 +300,77 @@ public abstract class CMFile {
     }
 
     /**
+     * The maximum title width that is set by default.
+     *
+     * @return The number of characters wide the title can be by default. This is set to 75.
+     */
+    public int getDefaultTitleWidth() {
+        return defaultTitleWidth;
+    }
+
+    /**
      * The title used at the top of the config file.
+     *
+     * @return The title to be used. By default, it returns -<( PLUGIN NAME )>-
      */
     public String getTitle() {
-        return "-<( " + plugin.getName() + " )>-";
+        return title;
     }
 
+    /**
+     * The characters used to separate external sources and their links.
+     *
+     * @return The characters that separate sources and links. Be default, it returns " - "
+     */
     public String getLinkSeparator() {
-        return " - ";
+        return linkSeparator;
     }
 
+    /**
+     * The subtitle displayed under the plugin title.
+     *
+     * @return The subtitle to be used. By default, it returns "Made by XXX, YYY and ZZZ" where XXX, YYY and ZZZ are plugin developers.
+     * The default value adjusts to the number of plugin developers listed.
+     */
     public String getSubtitle() {
-        StringBuilder authors = new StringBuilder();
-        List<String> authorsRaw = plugin.getDescription().getAuthors();
-        for (int i = 0; i < authorsRaw.size(); i++) {
-            String author = authorsRaw.get(i);
-            authors.append(author);
-            if (i < authorsRaw.size() - 2) {
-                authors.append(", ");
-            } else if (i == authorsRaw.size() - 2) {
-                authors.append(" and ");
-            }
-        }
-        return "Made by " + authors.toString();
+        return subtitle;
     }
 
+    /**
+     * The description underneath the title and subtitle of the config.
+     *
+     * @return The description to be used. By default, it uses the plugin's description from the plugin.yml file.
+     */
     public String getDescription() {
-        return plugin.getDescription().getDescription();
+        return description;
     }
 
     public HashMap<String, String> getExternalLinks() {
-        return new HashMap<>();
+        return externalLinks;
+    }
+
+    public void setDefaultTitleWidth(int defaultTitleWidth) {
+        this.defaultTitleWidth = defaultTitleWidth;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setLinkSeparator(String linkSeparator) {
+        this.linkSeparator = linkSeparator;
+    }
+
+    public void addLink(String name, String link) {
+        externalLinks.put(name, link);
     }
 
     public abstract void loadDefaults();
@@ -317,7 +378,6 @@ public abstract class CMFile {
     public void addDefault(String path, Object value) {
         config.addDefault(path, value);
         tempConfig.set(path, config.get(path));
-        nodeOrder.add(path);
     }
 
     public void addExample(String path, Object value) {
@@ -361,10 +421,6 @@ public abstract class CMFile {
         pendingComments.clear();
         builder.append(comment);
         comments.put(path, builder.toString());
-    }
-
-    public void addSection(String beforePath, String section) {
-        sections.put(beforePath, section);
     }
 
     public void addSection(String section) {
