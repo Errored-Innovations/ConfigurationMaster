@@ -10,16 +10,34 @@ import java.io.*;
 import java.util.*;
 
 /**
- * ConfigurationMaster
+ * CMFile is the specialised configuration file used by
+ * ConfigurationMaster to carry out all of the required tasks
+ * in creating a config file.
  *
- * This makes it easier to update and manage configurations.
- * It includes commenting and a title, all updated dynamically.
- * 
- * @author Thatsmusic99 (Holly)
+ * It can be initialised by extending the class or using the
+ * provided constructors below.
+ *
+ * You will be required to add all default values within the
+ * {@link #loadDefaults()} method, which should be added anyways due
+ * to it being an abstract method. This is so that all processes can be
+ * kept in one place - failure to do this results in a NullPointerException,
+ * since the plugin has not created the actual files yet, this rejects them.
+ *
+ * Following initialisation, setters such as {@link #setTitle(String)}
+ * and {@link #addLink(String, String)} can be called to toggle any
+ * options provided by the class. Once this is all done, you need to
+ * call {@link #load()}, which starts generating all the options and comments.
+ *
+ * To reload the configuration file, call {@link #reload()} or {@link #load()}.
+ * Both do the same thing, but {@link #reload()} is used for the sake of naming
+ * conventions and to make it easier for others to use and understand.
+ *
+ * @author Holly (Thatsmusic99)
  */
 public abstract class CMFile {
 
     // The actual configuration file.
+    @Nullable
     private FileConfiguration config;
     // The temporary config file that is used to order nodes.
     private FileConfiguration tempConfig;
@@ -41,10 +59,14 @@ public abstract class CMFile {
     private String name;
 
     private int defaultTitleWidth;
+    @Nullable
     private String title;
+    @Nullable
     private String subtitle;
     private HashMap<String, String> externalLinks;
+    @NotNull
     private String linkSeparator;
+    @Nullable
     private String description;
 
     /**
@@ -70,6 +92,8 @@ public abstract class CMFile {
         this.folder = folder;
         this.name = name;
 
+        config = null;
+
         defaultTitleWidth = 75;
         title = "-<( " + plugin.getName() + " )>-";
 
@@ -93,11 +117,32 @@ public abstract class CMFile {
 
     /**
      * Reloads the config file.
+     * @see #load()
      */ 
     public void reload() {
         load();
     }
 
+    /**
+     * Prompts the config to initiate CM's loading process.
+     *
+     * The process is as follows:
+     * - Create the config file - and required folder - if necessary.
+     * - Load all existing options into the config to be read from.
+     * - Load all the defaults.
+     * @see #loadDefaults()
+     * - Moving all old options to their new ones.
+     * @see #moveTo(String, String)
+     * @see #moveToNew()
+     * - Saves defaults to the configuration file.
+     * - Anything required to happen post-save happens.
+     * @see #postSave()
+     * - Loads the config header.
+     * @see #loadTitle()
+     * - Writes all comments.
+     * @see #writeComments()
+     * - Saves the final results.
+     */
     public void load() {
         // Creates the config file object
         configFile = new File(folder, name + ".yml");
@@ -160,7 +205,7 @@ public abstract class CMFile {
 
     /**
      * Loads the title of the config file.
-     * Can be overriden.
+     * Can be overridden.
      */
     public void loadTitle() {
         List<String> title = new ArrayList<>();
@@ -187,7 +232,7 @@ public abstract class CMFile {
         title.add(emptyLine);
         title.add(breakingLine);
         // Add the description and external links.
-        if (getDescription() != null || !getExternalLinks().isEmpty()) {
+        if ((getDescription() != null && !getDescription().isEmpty()) || !getExternalLinks().isEmpty()) {
             title.addAll(formatStr(getDescription(), Pos.LEFT));
             title.add(emptyLine);
             for (String link : getExternalLinks().keySet()) {
@@ -204,7 +249,12 @@ public abstract class CMFile {
 
     /** 
      * Used to align strings in a specific manner.
+     *
      * Can also place them on separate lines.
+     *
+     * @param str The full string to be formatted.
+     * @param position The alignment type to be used.
+     * @return A list of broken up strings, all on their designated lines.
      */
     private List<String> formatStr(String str, Pos position) {
         // The list of lines resulting from the aligned/split string.
@@ -281,9 +331,11 @@ public abstract class CMFile {
      * However, if there are external links, the title is expanded to hold it.
      *
      * @return The number of characters wide the title can be.
+     * @see #getDefaultTitleWidth() 
+     * @see #setDefaultTitleWidth(int) 
      */
     public int getMaxTitleWidth() {
-        // If there are no external links, return 75.
+        // If there are no external links, return the default value.
         if (getExternalLinks().isEmpty()) {
             return getDefaultTitleWidth();
         } else {
@@ -302,9 +354,14 @@ public abstract class CMFile {
     }
 
     /**
-     * The maximum title width that is set by default.
+     * The title width that is set by default.
+     * This is the minimum of what the header can be; it can be altered by external links.
+     * This is to stop the links being broken up and unusable.
+     * If you don't want links overriding
      *
      * @return The number of characters wide the title can be by default. This is set to 75.
+     * @see #setDefaultTitleWidth(int) 
+     * @see #getMaxTitleWidth() 
      */
     public int getDefaultTitleWidth() {
         return defaultTitleWidth;
@@ -314,7 +371,9 @@ public abstract class CMFile {
      * The title used at the top of the config file.
      *
      * @return The title to be used. By default, it returns -<( PLUGIN NAME )>-
+     * @see #setTitle(String) 
      */
+    @Nullable
     public String getTitle() {
         return title;
     }
@@ -323,7 +382,9 @@ public abstract class CMFile {
      * The characters used to separate external sources and their links.
      *
      * @return The characters that separate sources and links. Be default, it returns " - "
+     * @see #setLinkSeparator(String) 
      */
+    @NotNull
     public String getLinkSeparator() {
         return linkSeparator;
     }
@@ -333,7 +394,9 @@ public abstract class CMFile {
      *
      * @return The subtitle to be used. By default, it returns "Made by XXX, YYY and ZZZ" where XXX, YYY and ZZZ are plugin developers.
      * The default value adjusts to the number of plugin developers listed.
+     * @see #setSubtitle(String) 
      */
+    @Nullable
     public String getSubtitle() {
         return subtitle;
     }
@@ -342,42 +405,143 @@ public abstract class CMFile {
      * The description underneath the title and subtitle of the config.
      *
      * @return The description to be used. By default, it uses the plugin's description from the plugin.yml file.
+     * @see #setDescription(String) 
      */
+    @Nullable
     public String getDescription() {
         return description;
     }
 
+    /**
+     * A list of external sources with their links to them. 
+     *
+     * @return A hashmap of the sources and links. The key is the source name itself, 
+     * such as "Github", and the value is the link, e.g. "https://github.com".
+     * 
+     * @see #addLink(String, String) 
+     */
     public HashMap<String, String> getExternalLinks() {
         return externalLinks;
     }
 
+    /**
+     * Sets the default title width to a different minimum.
+     *
+     * @param defaultTitleWidth The minimum to be set to.
+     * @throws IllegalArgumentException if the provided width is shorter than 20 characters.
+     *
+     * Having a width of at least 20 characters ensures that the header can be formatted correctly.
+     * This limit may be removed - or reduced - once the justified alignment is introduced.
+     *
+     * @see #getDefaultTitleWidth()
+     * @see #getMaxTitleWidth()
+     */
     public void setDefaultTitleWidth(int defaultTitleWidth) {
+        if (defaultTitleWidth < 20) {
+            throw new IllegalArgumentException("Default title width cannot be shorter than 20 characters.");
+        }
         this.defaultTitleWidth = defaultTitleWidth;
     }
 
-    public void setDescription(String description) {
+    /**
+     * Sets the description used in the configuration header.
+     *
+     * To get rid of the description, set it to null.
+     *
+     * @param description The new description to be used.
+     * @see #getDescription()
+     */
+    public void setDescription(@Nullable String description) {
         this.description = description;
     }
 
-    public void setSubtitle(String subtitle) {
+    /**
+     * Sets the subtitle that sits underneath the title.
+     *
+     * To get rid of this, set it to null.
+     *
+     * @param subtitle The new subtitle to be used.
+     * @see #getSubtitle()
+     */
+    public void setSubtitle(@Nullable String subtitle) {
         this.subtitle = subtitle;
     }
 
-    public void setTitle(String title) {
+    /**
+     * Sets the title of the config header.
+     *
+     * To get rid of it, set it to null.
+     *
+     * @param title The new title to be used.
+     * @see #getLinkSeparator()
+     */
+    public void setTitle(@Nullable String title) {
         this.title = title;
     }
 
-    public void setLinkSeparator(String linkSeparator) {
+    /**
+     * Sets the link separator in between the source name and its link.
+     *
+     * Cannot be null due to the risk of malformed links.
+     *
+     * @param linkSeparator The new link separator to be used.
+     * @see #getLinkSeparator()
+     */
+    public void setLinkSeparator(@NotNull String linkSeparator) {
         this.linkSeparator = linkSeparator;
     }
 
-    public void addLink(String name, String link) {
+    /**
+     * Adds a new external link to be displayed in the configuration.
+     *
+     * @param name The name of the source to be used, such as Github.
+     * @param link The actual link, such as https://github.com
+     * @see #getExternalLinks()
+     * @see #removeLink(String) 
+     */
+    public void addLink(@NotNull String name, @NotNull String link) {
         externalLinks.put(name, link);
     }
 
+    /**
+     * Removes an external link which may have been added beforehand.
+     * 
+     * @param name The name of the source to be removed.
+     * @see #getExternalLinks() 
+     * @see #addLink(String, String) 
+     */
+    public void removeLink(@NotNull String name) {
+        externalLinks.remove(name);
+    }
+
+    /**
+     * The method where all default values, comments and sections should be added inside.
+     * 
+     * @see #addComment(String) 
+     * @see #addComment(String, String) 
+     * @see #addDefault(String, Object) 
+     * @see #addDefault(String, Object, String) 
+     * @see #addDefault(String, Object, String, String) 
+     * @see #addExample(String, Object) 
+     * @see #addExample(String, Object, String) 
+     * @see #addSection(String) 
+     */
     public abstract void loadDefaults();
 
-    public void addDefault(String path, Object value) {
+    /**
+     * Adds a default value to a specified path.
+     * If the path already exists, the value will not be used.
+     *
+     * @param path The path of the value to be set.
+     * @param value The actual value itself.
+     *
+     * @see org.bukkit.configuration.MemoryConfiguration#addDefault(String, Object)
+     * @throws NullPointerException if the config has not been initialised yet.
+     */
+    public void addDefault(@NotNull String path, Object value) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
+        }
         if (!pendingComments.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (String str : pendingComments) {
@@ -390,40 +554,136 @@ public abstract class CMFile {
         tempConfig.set(path, config.get(path));
     }
 
-    public void addExample(String path, Object value) {
+    /**
+     * Adds an example option.
+     *
+     * Functions the same as {@link #addDefault(String, Object)}, however
+     * the default is only added if the config is brand new. The value will not
+     * be used either if the path already exists.
+     *
+     * It serves the purpose of providing a user with an example option to use
+     * within a ConfigurationSection for example.
+     *
+     * @param path The path of the option to be set.
+     * @param value The example value.
+     * @see #addDefault(String, Object)
+     */
+    public void addExample(@NotNull String path, Object value) {
         if (isNew) {
             addDefault(path, value);
         }
     }
 
-    public void addExample(String path, Object value, String comment) {
+    /**
+     * Adds an example option with a comment included.
+     *
+     * Functions the same as {@link #addDefault(String, Object, String)}, however
+     * the default and comment is only added if the config is brand new. The value
+     * will not be used either if the path already exists.
+     *
+     * It serves the purpose of providing a user with an example option to use
+     * within a ConfigurationSection for example.
+     *
+     * To make a comment multiple lines, use \n.
+     *
+     * @param path The path of the option to be set.
+     * @param value The example value.
+     * @param comment The comment to be included.
+     * @see #addDefault(String, Object, String)
+     */
+    public void addExample(@NotNull String path, Object value, String comment) {
         if (isNew) {
             addDefault(path, value);
             addComment(path, comment);
         }
     }
 
-    public void set(String path, Object value) {
+    /**
+     * Sets a specific value to a specified path.
+     *
+     * @param path The path of the option to be set.
+     * @param value The actual value itself.
+     *
+     * @see org.bukkit.configuration.MemorySection#set(String, Object)
+     * @throws NullPointerException if the config has not been initialised yet.
+     */
+    public void set(@NotNull String path, Object value) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use set within the loadDefaults method.");
+        }
         config.set(path, value);
         tempConfig.set(path, config.get(path));
     }
 
-    public void addDefault(String path, Object value, String section, String comment) {
+    /**
+     * Adds a default value to a specified path, in addition to a comment and section.
+     * If the path already exists, the value will not be used. The comment and section
+     * are still added regardless.
+     *
+     * To make a comment multiple lines, use \n.
+     *
+     * @param path The path of the option to be set.
+     * @param value The actual value itself.
+     * @param section The section that the option will be put under.
+     * @param comment The comment that is placed above the option.
+     *                
+     * @see #addDefault(String, Object) 
+     * @see #addSection(String) 
+     * @see #addComment(String) 
+     */
+    public void addDefault(@NotNull String path, Object value, @NotNull String section, @NotNull String comment) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
+        }
         addDefault(path, value);
         addSection(section);
         addComment(path, comment);
     }
 
-    public void addDefault(String path, Object value, String comment) {
+    /**
+     * Adds a default value to a specified path, in addition to a comment.
+     * If the path already exists, the value will not be used. The comment is still added
+     * regardless.
+     *
+     * To make a comment multiple lines, use \n.
+     *
+     * @param path The path of the option to be set.
+     * @param value The actual value itself.
+     * @param comment The comment that is placed above the option.
+     *                
+     * @see #addDefault(String, Object) 
+     * @see #addComment(String) 
+     */
+    public void addDefault(@NotNull String path, Object value, @NotNull String comment) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
+        }
         addDefault(path, value);
         addComment(path, comment);
     }
 
-    public void addComment(String comment) {
+    /**
+     * Adds a comment to the configuration.
+     *
+     * The comment is placed underneath the last default option to
+     * be declared and above the next declared default option.
+     * 
+     * @param comment The comment to be added.
+     */
+    public void addComment(@NotNull String comment) {
         pendingComments.add(comment);
     }
 
-    public void addComment(String path, String comment) {
+    /**
+     * Adds a comment to the configuration.
+     *
+     * The path provided is the option that the comment will be
+     * placed above.
+     *
+     * @param path The path that the comment will be under.
+     * @param comment The comment itself.
+     */
+    public void addComment(@NotNull String path, @NotNull String comment) {
         StringBuilder builder = new StringBuilder();
         for (String str : pendingComments) {
             builder.append(str).append("\n\n");
@@ -433,15 +693,38 @@ public abstract class CMFile {
         comments.put(path, builder.toString());
     }
 
-    public void addSection(String section) {
+    /**
+     * Adds a section to the configuration.
+     *
+     * @param section The name of the section to be added.
+     */
+    public void addSection(@NotNull String section) {
         pendingComments.add("CONFIG_SECTION: " + section);
     }
 
+    /**
+     * Anything that the plugin may want to do after finishing the loading
+     * process.
+     */
     public void postSave() {}
 
+    /**
+     * A method that can be used as an opportunity to move options to
+     * new paths.
+     * 
+     * @see #moveTo(String, String) 
+     */
     public void moveToNew() {}
 
-    public void moveTo(String oldPath, String newPath) {
+    /**
+     * Moves an option from an old path to a new one.
+     *
+     * Afterwards, the old path is removed.
+     *
+     * @param oldPath the currently existing path that needs to be moved.
+     * @param newPath the new path to be moved to.
+     */
+    public void moveTo(@NotNull String oldPath, @NotNull String newPath) {
         if (config.contains(oldPath)) {
             Object object = config.get(oldPath);
             tempConfig.set(newPath, object);
@@ -449,10 +732,18 @@ public abstract class CMFile {
         }
     }
 
+    /**
+     * The actual configuration file being processed.
+     *
+     * @return The config file as a FileConfiguration object.
+     */
     public FileConfiguration getConfig() {
         return config;
     }
 
+    /**
+     * Initiates the comment writing process.
+     */
     public void writeComments() {
         // For each comment to be made...
         for (String path : comments.keySet()) {
@@ -462,6 +753,7 @@ public abstract class CMFile {
             writeComment(path, divisions, 0, 0);
         }
 
+        // However, if there's any comments left, write them in.
         for (String str : pendingComments) {
             if (str.isEmpty()) {
                 currentLines.add("");
@@ -487,6 +779,14 @@ public abstract class CMFile {
         }
     }
 
+    /**
+     * Method used to write a specified comment.
+     *
+     * @param path The path the comment must be written at.
+     * @param divisions The number of sections the part can be split up into.
+     * @param iteration How far we're down the pathway (in terms of different sections).
+     * @param startingLine The line we're starting from.
+     */
     private void writeComment(String path, String[] divisions, int iteration, int startingLine) {
         StringBuilder indent = new StringBuilder();
         for (int j = 0; j < iteration; j++) {
@@ -495,7 +795,9 @@ public abstract class CMFile {
         // Go through each line in the file
         for (int i = startingLine; i < currentLines.size(); i++) {
             String line = currentLines.get(i);
+            // If the line doesn't have an equal or larger indent, then the line could not be found.
             if (!line.startsWith(indent.toString())) return;
+            // If it's already a comment, leave it be.
             if (line.startsWith("#")) continue;
             if (line.startsWith(indent.toString() + divisions[iteration] + ":") ||
                     line.startsWith(indent.toString() + "'" + divisions[iteration] + "':")) {
@@ -539,9 +841,14 @@ public abstract class CMFile {
         }
     }
 
-    public void save(boolean isConfig) {
+    /**
+     * Saves the changes or comments made to the configuration to the file.
+     *
+     * @param isConfigSaving true if saving default values, false if saving comments.
+     */
+    public void save(boolean isConfigSaving) {
         try {
-            if (isConfig) {
+            if (isConfigSaving) {
                 tempConfig.save(configFile);
                 BufferedReader reader = new BufferedReader(new FileReader(configFile));
                 String currentLine;
