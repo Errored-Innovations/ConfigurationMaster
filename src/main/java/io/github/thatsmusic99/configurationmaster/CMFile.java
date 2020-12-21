@@ -369,7 +369,7 @@ public abstract class CMFile {
     /**
      * The title used at the top of the config file.
      *
-     * @return The title to be used. By default, it returns -<( PLUGIN NAME )>-
+     * @return The title to be used. By default, it returns -&lt;( PLUGIN NAME )&gt;-
      * @see #setTitle(String) 
      */
     @Nullable
