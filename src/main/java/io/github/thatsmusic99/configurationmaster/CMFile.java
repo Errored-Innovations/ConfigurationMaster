@@ -135,13 +135,13 @@ public abstract class CMFile {
      * @see #moveTo(String, String)
      * @see #moveToNew()
      * - Saves defaults to the configuration file.
-     * - Anything required to happen post-save happens.
-     * @see #postSave()
      * - Loads the config header.
      * @see #loadTitle()
      * - Writes all comments.
      * @see #writeComments()
      * - Saves the final results.
+     * - Anything required to happen post-save happens.
+     * @see #postSave()
      */
     public void load() {
         // Creates the config file object
@@ -186,8 +186,6 @@ public abstract class CMFile {
         // Save the current default options.
         config.options().copyDefaults(true);
         save(true);
-        // Do anything the plugin requires to do following saving of a config file.
-        postSave();
         // Load the config title.
         loadTitle();
         // Write all the comments.
@@ -200,7 +198,8 @@ public abstract class CMFile {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        // Do anything the plugin requires to do following saving of a config file.
+        postSave();
     }
 
     /**
