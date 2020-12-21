@@ -12,21 +12,21 @@ import java.util.*;
 /**
  * CMFile is the specialised configuration file used by
  * ConfigurationMaster to carry out all of the required tasks
- * in creating a config file.
+ * in creating a config file.<br><br>
  *
  * It can be initialised by extending the class or using the
- * provided constructors below.
+ * provided constructors below.<br><br>
  *
  * You will be required to add all default values within the
  * {@link #loadDefaults()} method, which should be added anyways due
  * to it being an abstract method. This is so that all processes can be
  * kept in one place - failure to do this results in a NullPointerException,
- * since the plugin has not created the actual files yet, this rejects them.
+ * since the plugin has not created the actual files yet, this rejects them.<br><br>
  *
  * Following initialisation, setters such as {@link #setTitle(String)}
  * and {@link #addLink(String, String)} can be called to toggle any
  * options provided by the class. Once this is all done, you need to
- * call {@link #load()}, which starts generating all the options and comments.
+ * call {@link #load()}, which starts generating all the options and comments.<br><br>
  *
  * To reload the configuration file, call {@link #reload()} or {@link #load()}.
  * Both do the same thing, but {@link #reload()} is used for the sake of naming
@@ -70,7 +70,7 @@ public abstract class CMFile {
     private String description;
 
     /**
-     * Basic initialisation of the config file.
+     * Basic initialisation of the config file, using just the plugin and config name.<br>
      * This places the file inside the plugin's data folder.
      * 
      * @param plugin The plugin using the utility.
@@ -81,7 +81,7 @@ public abstract class CMFile {
     }
 
     /**
-     * Initialisation of the config file.
+     * Initialisation of the config file, using the plugin, config name and folder.
      *
      * @param plugin The plugin using the utility.
      * @param folder The folder the configuration file is to be stored inside.
@@ -127,20 +127,23 @@ public abstract class CMFile {
      * Prompts the config to initiate CM's loading process.
      *
      * The process is as follows:
-     * - Create the config file - and required folder - if necessary.
-     * - Load all existing options into the config to be read from.
-     * - Load all the defaults.
+     * <ul>
+     *     <li>Create the config file - and required folder - if necessary.</li>
+     *     <li>Load all existing options into the config to be read from.</li>
+     *     <li>Load all the defaults.</li>
+     *     <li>Moving all old options to their new ones.</li>
+     *     <li>Saves defaults to the configuration file.</li>
+     *     <li>Loads the config header.</li>
+     *     <li>Writes all comments.</li>
+     *     <li>Saves the final results.</li>
+     *     <li>Anything required to happen post-save happens.</li>
+     * </ul>
+     *
      * @see #loadDefaults()
-     * - Moving all old options to their new ones.
      * @see #moveTo(String, String)
      * @see #moveToNew()
-     * - Saves defaults to the configuration file.
-     * - Loads the config header.
      * @see #loadTitle()
-     * - Writes all comments.
      * @see #writeComments()
-     * - Saves the final results.
-     * - Anything required to happen post-save happens.
      * @see #postSave()
      */
     public void load() {
@@ -203,8 +206,15 @@ public abstract class CMFile {
     }
 
     /**
-     * Loads the title of the config file.
-     * Can be overridden.
+     * Loads the title of the config file.<br><br>
+     *
+     * It handles the following elements in order:
+     * <ul>
+     *     <li>The title</li>
+     *     <li>The subtitle</li>
+     *     <li>The description</li>
+     *     <li>Any external links</li>
+     * </ul>
      */
     public void loadTitle() {
         List<String> title = new ArrayList<>();
@@ -353,10 +363,9 @@ public abstract class CMFile {
     }
 
     /**
-     * The title width that is set by default.
+     * The title width that is set by default.<br>
      * This is the minimum of what the header can be; it can be altered by external links.
      * This is to stop the links being broken up and unusable.
-     * If you don't want links overriding
      *
      * @return The number of characters wide the title can be by default. This is set to 75.
      * @see #setDefaultTitleWidth(int) 
@@ -417,7 +426,8 @@ public abstract class CMFile {
      * @return A hashmap of the sources and links. The key is the source name itself, 
      * such as "Github", and the value is the link, e.g. "https://github.com".
      * 
-     * @see #addLink(String, String) 
+     * @see #addLink(String, String)
+     * @see #removeLink(String)
      */
     public HashMap<String, String> getExternalLinks() {
         return externalLinks;
@@ -472,7 +482,7 @@ public abstract class CMFile {
      * To get rid of it, set it to null.
      *
      * @param title The new title to be used.
-     * @see #getLinkSeparator()
+     * @see #getTitle()
      */
     public void setTitle(@Nullable String title) {
         this.title = title;
@@ -554,11 +564,11 @@ public abstract class CMFile {
     }
 
     /**
-     * Adds an example option.
+     * Adds an example option.<br><br>
      *
      * Functions the same as {@link #addDefault(String, Object)}, however
      * the default is only added if the config is brand new. The value will not
-     * be used either if the path already exists.
+     * be used either if the path already exists.<br><br>
      *
      * It serves the purpose of providing a user with an example option to use
      * within a ConfigurationSection for example.
@@ -574,14 +584,14 @@ public abstract class CMFile {
     }
 
     /**
-     * Adds an example option with a comment included.
+     * Adds an example option with a comment included.<br><br>
      *
      * Functions the same as {@link #addDefault(String, Object, String)}, however
      * the default and comment is only added if the config is brand new. The value
-     * will not be used either if the path already exists.
+     * will not be used either if the path already exists.<br><br>
      *
      * It serves the purpose of providing a user with an example option to use
-     * within a ConfigurationSection for example.
+     * within a ConfigurationSection for example.<br><br>
      *
      * To make a comment multiple lines, use \n.
      *
@@ -617,7 +627,7 @@ public abstract class CMFile {
     /**
      * Adds a default value to a specified path, in addition to a comment and section.
      * If the path already exists, the value will not be used. The comment and section
-     * are still added regardless.
+     * are still added regardless.<br><br>
      *
      * To make a comment multiple lines, use \n.
      *
@@ -642,7 +652,7 @@ public abstract class CMFile {
     /**
      * Adds a default value to a specified path, in addition to a comment.
      * If the path already exists, the value will not be used. The comment is still added
-     * regardless.
+     * regardless.<br><br>
      *
      * To make a comment multiple lines, use \n.
      *
@@ -662,7 +672,7 @@ public abstract class CMFile {
     }
 
     /**
-     * Adds a comment to the configuration.
+     * Adds a comment to the configuration.<br><br>
      *
      * The comment is placed underneath the last default option to
      * be declared and above the next declared default option.
@@ -674,7 +684,7 @@ public abstract class CMFile {
     }
 
     /**
-     * Adds a comment to the configuration.
+     * Adds a comment to the configuration.<br><br>
      *
      * The path provided is the option that the comment will be
      * placed above.
