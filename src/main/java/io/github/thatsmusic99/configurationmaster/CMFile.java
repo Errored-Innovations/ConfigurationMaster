@@ -376,6 +376,14 @@ public abstract class CMFile {
     public abstract void loadDefaults();
 
     public void addDefault(String path, Object value) {
+        if (!pendingComments.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (String str : pendingComments) {
+                builder.append(str).append("\n\n");
+            }
+            pendingComments.clear();
+            comments.put(path, builder.toString());
+        }
         config.addDefault(path, value);
         tempConfig.set(path, config.get(path));
     }
