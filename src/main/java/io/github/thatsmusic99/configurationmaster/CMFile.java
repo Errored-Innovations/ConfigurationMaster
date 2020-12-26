@@ -233,15 +233,24 @@ public abstract class CMFile {
         }
         emptyLineSB.append(" #");
         String emptyLine = emptyLineSB.toString();
-        // Add the breaking line first.
-        title.add(breakingLine);
-        // Add the title and subtitle.
-        title.addAll(formatStr(getTitle(), Pos.CENTER));
-        title.addAll(formatStr(getSubtitle(), Pos.CENTER));
-        title.add(emptyLine);
-        title.add(breakingLine);
+        //
+        boolean requiresBreakingLine = true;
+        if (getTitle() != null && getSubtitle() != null) {
+            // Add the breaking line first.
+            title.add(breakingLine);
+            // Add the title and subtitle.
+            title.addAll(formatStr(getTitle(), Pos.CENTER));
+            title.addAll(formatStr(getSubtitle(), Pos.CENTER));
+            title.add(emptyLine);
+            title.add(breakingLine);
+            requiresBreakingLine = false;
+        }
+
         // Add the description and external links.
         if ((getDescription() != null && !getDescription().isEmpty()) || !getExternalLinks().isEmpty()) {
+            if (requiresBreakingLine) {
+                title.add(breakingLine);
+            }
             title.addAll(formatStr(getDescription(), Pos.LEFT));
             title.add(emptyLine);
             for (String link : getExternalLinks().keySet()) {
