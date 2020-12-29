@@ -617,6 +617,24 @@ public abstract class CMFile {
     }
 
     /**
+     * Creates what is considered to be a "lenient" section.<br><br>
+     *
+     * Because ConfigurationMaster is very strict with what the user adds and
+     * removes, a lenient section lets them add and remove what they like.<br><br>
+     *
+     * An example usage of this is in AdvancedTeleport when creating per-world
+     * spawning and teleportation rules.
+     *
+     * @param path The path of the section.
+     */
+    public void addLenientSection(@NotNull String path) {
+        if (getConfig().get(path) == null) {
+            getConfig().createSection(path);
+        }
+        tempConfig.set(path, getConfig().get(path));
+    }
+
+    /**
      * Sets a specific value to a specified path.
      *
      * @param path The path of the option to be set.
