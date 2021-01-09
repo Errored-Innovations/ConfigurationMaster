@@ -671,9 +671,10 @@ public abstract class CMFile {
         if (config == null) {
             throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
         }
-        addDefault(path, value);
         addSection(section);
         addComment(path, comment);
+        addDefault(path, value);
+
     }
 
     /**
@@ -694,8 +695,8 @@ public abstract class CMFile {
         if (config == null) {
             throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
         }
-        addDefault(path, value);
         addComment(path, comment);
+        addDefault(path, value);
     }
 
     /**

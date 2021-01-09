@@ -6,7 +6,7 @@
 
     <groupId>com.github.thatsmusic99</groupId>
     <artifactId>ConfigurationMaster</artifactId>
-    <version>v1.0-RC-1</version>
+    <version>v1.0-RC-2</version>
 
     <build>
         <plugins>
