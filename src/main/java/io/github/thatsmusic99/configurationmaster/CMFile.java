@@ -778,6 +778,7 @@ public abstract class CMFile {
      *
      * @return The config file as a FileConfiguration object.
      */
+    @Nullable
     public FileConfiguration getConfig() {
         return config;
     }
