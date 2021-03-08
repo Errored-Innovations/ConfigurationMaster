@@ -563,7 +563,7 @@ public abstract class CMFile {
         if (!pendingComments.isEmpty()) {
             StringBuilder builder = new StringBuilder();
             for (String str : pendingComments) {
-                builder.append(str).append("\n\n");
+                builder.append(str).append("\n");
             }
             pendingComments.clear();
             comments.put(path, builder.toString());
