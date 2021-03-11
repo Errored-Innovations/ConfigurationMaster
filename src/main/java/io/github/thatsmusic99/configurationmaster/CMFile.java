@@ -1,5 +1,6 @@
 package io.github.thatsmusic99.configurationmaster;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,13 +45,13 @@ public abstract class CMFile {
     // The file object for the config.
     private File configFile;
     // Comments to be written above the provided options.
-    private HashMap<String, String> comments;
+    private HashMap<String, List<RawComment>> comments;
     // The currently written lines of the file.
     private List<String> currentLines;
     // If the file is newly generated or not.
     private boolean isNew;
     // Comments pending to be added.
-    private List<String> pendingComments;
+    private List<RawComment> pendingComments;
     // The plugin using the utility.
     private Plugin plugin;
     // The folder that the config is to be stored in.
@@ -68,6 +69,12 @@ public abstract class CMFile {
     private String linkSeparator;
     @Nullable
     private String description;
+
+    private boolean haveFixedSectionLength = false;
+
+    private boolean includeDefaults = false;
+
+    private boolean addNewlineBeforeChildOptions = false;
 
     /**
      * Basic initialisation of the config file, using just the plugin and config name.<br>
@@ -162,8 +169,8 @@ public abstract class CMFile {
             }
         }
         // Try to load the current options from the config file
+        config = new YamlConfiguration();
         try {
-            config = new YamlConfiguration();
             config.load(configFile);
         } catch (Exception ex) {
             // Otherwise, rename it and warn the user
@@ -239,8 +246,8 @@ public abstract class CMFile {
             // Add the breaking line first.
             title.add(breakingLine);
             // Add the title and subtitle.
-            title.addAll(formatStr(getTitle(), Pos.CENTER));
-            title.addAll(formatStr(getSubtitle(), Pos.CENTER));
+            title.addAll(formatStr(getTitle(), Pos.CENTER, getMaxTitleWidth()));
+            title.addAll(formatStr(getSubtitle(), Pos.CENTER, getMaxTitleWidth()));
             title.add(emptyLine);
             title.add(breakingLine);
             requiresBreakingLine = false;
@@ -251,10 +258,10 @@ public abstract class CMFile {
             if (requiresBreakingLine) {
                 title.add(breakingLine);
             }
-            title.addAll(formatStr(getDescription(), Pos.LEFT));
+            title.addAll(formatStr(getDescription(), Pos.LEFT, getMaxTitleWidth()));
             title.add(emptyLine);
             for (String link : getExternalLinks().keySet()) {
-                title.add(formatStr(link + getLinkSeparator() + getExternalLinks().get(link), Pos.LEFT).get(0));
+                title.add(formatStr(link + getLinkSeparator() + getExternalLinks().get(link), Pos.LEFT, getMaxTitleWidth()).get(0));
             }
             title.add(breakingLine);
         }
@@ -274,7 +281,7 @@ public abstract class CMFile {
      * @param position The alignment type to be used.
      * @return A list of broken up strings, all on their designated lines.
      */
-    private List<String> formatStr(String str, Pos position) {
+    private List<String> formatStr(String str, Pos position, int length) {
         // The list of lines resulting from the aligned/split string.
         List<String> lines = new ArrayList<>();
         // If the string is null, just return an empty list.
@@ -293,7 +300,7 @@ public abstract class CMFile {
             // If the word added onto the sentence causes an overflow though...
             if (sentence.length() + word.length() > getMaxTitleWidth()) {
                 // Create the line.
-                lines.add("# " + align(sentence, position) + " #");
+                lines.add("# " + align(sentence, position, length) + " #");
                 // Empty the sentence.
                 sentence = new StringBuilder();
                 // Add the word onto a new line.
@@ -315,7 +322,11 @@ public abstract class CMFile {
     }
 
     private String align(StringBuilder str, Pos position) {
-        int remainder = getMaxTitleWidth() - str.length();
+        return align(str, position, getMaxTitleWidth());
+    }
+
+    private String align(StringBuilder str, Pos position, int length) {
+        int remainder = length - str.length();
         switch (position) {
             case LEFT:
                 for (int i = 0; i < remainder; i++) {
@@ -560,13 +571,30 @@ public abstract class CMFile {
         if (config == null) {
             throw new NullPointerException("Configuration is not loading yet, please use addDefault within the loadDefaults method.");
         }
+        // If we need to add comments...
         if (!pendingComments.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (String str : pendingComments) {
-                builder.append(str).append("\n\n");
+            List<RawComment> currentComments = new ArrayList<>(pendingComments);
+            if (includeDefaults) {
+                if (!(value instanceof ConfigurationSection)) {
+                    RawComment lastComment = currentComments.get(currentComments.size() - 1);
+                    // If this is an actual comment...
+                    if (lastComment instanceof Comment) {
+                        // Append to it.
+                        ((Comment) lastComment).appendToComment("Default: " + value);
+                    } else {
+                        // Otherwise,
+                        currentComments.add(new Comment("Default: " + value));
+                    }
+                }
+
             }
+            comments.put(path, currentComments);
             pendingComments.clear();
-            comments.put(path, builder.toString());
+        // Although, if we're still including default options and we're not adding a ConfigurationSection...
+        } else if (includeDefaults && !(value instanceof ConfigurationSection)) {
+            //
+            List<RawComment> currentComments = Collections.singletonList(new Comment("Default: " + value));
+            comments.put(path, currentComments);
         }
         config.addDefault(path, value);
         tempConfig.set(path, config.get(path));
@@ -611,8 +639,8 @@ public abstract class CMFile {
      */
     public void addExample(@NotNull String path, Object value, String comment) {
         if (isNew) {
-            addDefault(path, value);
             addComment(path, comment);
+            addDefault(path, value);
         }
     }
 
@@ -674,7 +702,6 @@ public abstract class CMFile {
         addSection(section);
         addComment(path, comment);
         addDefault(path, value);
-
     }
 
     /**
@@ -708,7 +735,7 @@ public abstract class CMFile {
      * @param comment The comment to be added.
      */
     public void addComment(@NotNull String comment) {
-        pendingComments.add(comment);
+        pendingComments.add(new Comment(comment));
     }
 
     /**
@@ -721,13 +748,10 @@ public abstract class CMFile {
      * @param comment The comment itself.
      */
     public void addComment(@NotNull String path, @NotNull String comment) {
-        StringBuilder builder = new StringBuilder();
-        for (String str : pendingComments) {
-            builder.append(str).append("\n\n");
-        }
+        List<RawComment> currentComments = new ArrayList<>(pendingComments);
         pendingComments.clear();
-        builder.append(comment);
-        comments.put(path, builder.toString());
+        currentComments.add(new Comment(comment));
+        comments.put(path, currentComments);
     }
 
     /**
@@ -736,7 +760,11 @@ public abstract class CMFile {
      * @param section The name of the section to be added.
      */
     public void addSection(@NotNull String section) {
-        pendingComments.add("CONFIG_SECTION: " + section);
+        pendingComments.add(new Section(section, null));
+    }
+
+    public void addSection(@NotNull String section, String description) {
+        pendingComments.add(new Section(section, description));
     }
 
     /**
@@ -754,7 +782,7 @@ public abstract class CMFile {
     public void moveToNew() {}
 
     /**
-     * Moves an option from an old path to a new one.
+     * Moves an option from an old path to a new one.<br><br>
      *
      * Afterwards, the old path is removed.
      *
@@ -771,6 +799,19 @@ public abstract class CMFile {
             tempConfig.set(newPath, object);
             config.set(oldPath, null);
         }
+    }
+
+    /**
+     * Whether or not default values should be included in config option comments.
+     *
+     * If this is true, it will add a "Default: [Option]" comment above all options.
+     *
+     * This is false by default.
+     *
+     * @return Whether or not default values are to be included in config option comments.
+     */
+    public boolean isIncludingDefaultsInComments() {
+        return includeDefaults;
     }
 
     /**
@@ -796,27 +837,38 @@ public abstract class CMFile {
         }
 
         // However, if there's any comments left, write them in.
-        for (String str : pendingComments) {
-            if (str.isEmpty()) {
-                currentLines.add("");
-            } else {
-                currentLines.add("");
-                if (str.startsWith("CONFIG_SECTION: ")) {
-                    String section = str.split(": ")[1];
-                    StringBuilder length = new StringBuilder();
-                    length.append("###");
-                    for (int j = 0; j < section.length(); j++) {
-                        length.append("#");
-                    }
-                    length.append("###");
-                    currentLines.add(length.toString());
-                    currentLines.add("#  " + section + "  #");
-                    currentLines.add(length.toString());
-                    currentLines.add("");
-                } else {
-                    currentLines.add("# " + str);
+        for (RawComment comment : pendingComments) {
+            currentLines.add("");
+            if (comment instanceof Section) {
+                String section = ((Section) comment).section;
+                String description = ((Section) comment).description;
+                int length = section.length() + 6;
+                if (haveFixedSectionLength) {
+                    length = getMaxTitleWidth();
                 }
+                StringBuilder topBorder = new StringBuilder();
+                for (int j = 0; j < length; j++) {
+                    topBorder.append("#");
+                }
+                currentLines.add(topBorder.toString());
+                if (haveFixedSectionLength) {
+                    currentLines.addAll(formatStr("", Pos.CENTER, length));
+                }
+                currentLines.addAll(formatStr(section, Pos.CENTER, length));
+                if (description != null) {
+                    currentLines.addAll(formatStr("", Pos.CENTER, length));
+                    currentLines.add(align(new StringBuilder(description), Pos.CENTER, length));
+                    if (haveFixedSectionLength) {
+                        currentLines.add(align(new StringBuilder(), Pos.CENTER, length));
+                    }
+                }
+                currentLines.add(topBorder.toString());
 
+            } else {
+                Comment aComment = (Comment) comment;
+                if (!aComment.comment.isEmpty()) {
+                    currentLines.addAll(aComment.getFormattedComment());
+                }
             }
         }
     }
@@ -841,39 +893,55 @@ public abstract class CMFile {
             if (!line.startsWith(indent.toString())) return;
             // If it's already a comment, leave it be.
             if (line.startsWith("#")) continue;
+            // Make sure we're on the right line with the correct content.
             if (line.startsWith(indent.toString() + divisions[iteration] + ":") ||
                     line.startsWith(indent.toString() + "'" + divisions[iteration] + "':")) {
+                // Increment the iteration we're on.
                 iteration += 1;
+                // If we're on the correct level...
                 if (iteration == divisions.length) {
+                    // We'll start searching for the option itself.
                     int currentLine = i;
-                    if (iteration == 1) {
-                        currentLines.add(currentLine, "");
-                        currentLine++;
+                    // If this is a single iteration, add a single break.
+                    if (iteration == 1 || addNewlineBeforeChildOptions) {
+                        currentLines.add(currentLine++, "");
                     }
-                    String[] rawComment = comments.get(path).split("\n");
-                    for (String commentPart : rawComment) {
-                        if (commentPart.isEmpty()) {
-                            currentLines.add(currentLine, "");
-                        } else {
-                            if (commentPart.startsWith("CONFIG_SECTION: ")) {
-                                String section = commentPart.split(": ")[1];
-                                StringBuilder length = new StringBuilder();
-                                length.append("###");
-                                for (int j = 0; j < section.length(); j++) {
-                                    length.append("#");
-                                }
-                                length.append("###");
-                                currentLines.add(currentLine, length.toString());
-                                currentLines.add(currentLine, "#  " + section + "  #");
-                                currentLines.add(currentLine, length.toString());
-                                currentLine += 3;
-                                continue;
-                            } else {
-                                currentLines.add(currentLine, indent + "# " + commentPart);
+                    // Get all the required comments for a specified path.
+                    List<RawComment> rawComments = comments.get(path);
+                    for (RawComment comment : rawComments) {
+                        currentLines.add(currentLine++, "");
+                        if (comment instanceof Section) {
+                            String section = ((Section) comment).section;
+                            String description = ((Section) comment).description;
+                            int length = section.length() + 6;
+                            if (haveFixedSectionLength) {
+                                length = getMaxTitleWidth();
                             }
-
+                            StringBuilder topBorder = new StringBuilder();
+                            for (int j = 0; j < length; j++) {
+                                topBorder.append("#");
+                            }
+                            currentLines.add(currentLine++, indent + topBorder.toString());
+                            if (haveFixedSectionLength) {
+                                currentLines.add(currentLine++, indent + align(new StringBuilder(), Pos.CENTER, length));
+                            }
+                            currentLines.add(currentLine++, indent + align(new StringBuilder(section), Pos.CENTER, length));
+                            if (description != null) {
+                                currentLines.add(currentLine++, indent + align(new StringBuilder(), Pos.CENTER, length));
+                                currentLines.add(currentLine++, indent + align(new StringBuilder(description), Pos.CENTER, length));
+                                if (haveFixedSectionLength) {
+                                    currentLines.add(currentLine++, indent + align(new StringBuilder(), Pos.CENTER, length));
+                                }
+                            }
+                            currentLines.add(currentLine++, indent + topBorder.toString());
+                        } else {
+                            Comment aComment = (Comment) comment;
+                            if (!aComment.comment.isEmpty()) {
+                                List<String> formattedComment = aComment.getFormattedComment(indent.toString());
+                                currentLines.addAll(currentLine, formattedComment);
+                                currentLine += formattedComment.size();
+                            }
                         }
-                        currentLine++;
                     }
                     break;
                 } else {
@@ -921,5 +989,54 @@ public abstract class CMFile {
         RIGHT,
         CENTER,
         LEFT
+    }
+
+    public enum CommentPosition {
+        ABOVE,
+        BELOW
+    }
+
+    public abstract static class RawComment {
+
+    }
+
+    public class Comment extends RawComment {
+
+        private String comment;
+
+        public Comment(String comment) {
+            this.comment = comment;
+        }
+
+        public String getComment() {
+            return comment;
+        }
+
+        public List<String> getFormattedComment() {
+            return getFormattedComment("");
+        }
+
+        public List<String> getFormattedComment(String indent) {
+            List<String> comment = new ArrayList<>();
+            for (String part : this.comment.split("\n")) {
+                comment.add(indent + "# " + part);
+            }
+            return comment;
+        }
+
+        public void appendToComment(String addition) {
+            comment += "\n" + addition;
+        }
+    }
+
+    public class Section extends RawComment {
+
+        private String section;
+        private String description;
+
+        public Section(String section, String description) {
+            this.section = section;
+            this.description = description;
+        }
     }
 }
