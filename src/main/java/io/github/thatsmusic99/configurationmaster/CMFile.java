@@ -917,6 +917,26 @@ public abstract class CMFile {
         }
     }
 
+    public void initiateSave() {
+        // Save the current default options.
+        config.options().copyDefaults(true);
+        save(true);
+        // Load the config title.
+        loadTitle();
+        // Write all the comments.
+        writeComments();
+        // Save the new comments.
+        save(false);
+        // Load the new options into the config that may have been changed from
+        try {
+            config.load(configFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Do anything the plugin requires to do following saving of a config file.
+        postSave();
+    }
+
     public enum Pos {
         RIGHT,
         CENTER,
