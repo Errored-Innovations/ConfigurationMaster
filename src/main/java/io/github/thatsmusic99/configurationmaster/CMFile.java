@@ -615,8 +615,8 @@ public abstract class CMFile {
     public void addExample(@NotNull String path, Object value, String comment) {
         if (isNew) {
             addDefault(path, value);
-            addComment(path, comment);
         }
+        addComment(path, comment);
     }
 
     /**
