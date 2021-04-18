@@ -18,15 +18,15 @@ To manage your dependencies, it is recommended to use either Maven or Gradle. In
 ```xml
     <repositories>
 	<repository>
-	    <id>jitpack.io</id>
-	    <url>https://jitpack.io</url>
+	    <id>cm-repo</id>
+	    <url>https://ci.pluginwiki.us/plugin/repository/everything/</url>
 	</repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>com.github.Thatsmusic99</groupId>
 	    <artifactId>ConfigurationMaster</artifactId>
-	    <version>v1.0-BETA-1</version>
+	    <version>v1.0.1</version>
 	</dependency>
     </dependencies>
 ```
