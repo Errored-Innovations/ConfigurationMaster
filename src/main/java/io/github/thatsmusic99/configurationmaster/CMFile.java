@@ -189,23 +189,10 @@ public abstract class CMFile {
         loadDefaults();
         // Move any old values to their new counterparts.
         moveToNew();
-        // Save the current default options.
-        config.options().copyDefaults(true);
-        save(true);
-        // Load the config title.
-        loadTitle();
-        // Write all the comments.
-        writeComments();
-        // Save the new comments.
-        save(false);
-        // Load the new options into the config that may have been changed from
-        try {
-            config.load(configFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // Do anything the plugin requires to do following saving of a config file.
-        postSave();
+        // Handle any extra values that may have been added by other files.
+        handleReceivingValues();
+        // Handle the saving procedure.
+        initiateSave();
     }
 
     /**
@@ -1257,6 +1244,9 @@ public abstract class CMFile {
         }
     }
 
+    /**
+     * Used to begin all saving procedures, such as saving options and writing comments.
+     */
     public void initiateSave() {
         // Save the current default options.
         config.options().copyDefaults(true);
