@@ -1100,6 +1100,16 @@ public abstract class CMFile {
         }
         toBeMoved.clear();
     }
+
+    /**
+     * Indicates whether the file is newly generated or not.
+     *
+     * @return true if the file is brand new.
+     */
+    public boolean isNew() {
+        return isNew;
+    }
+
     /**
      * The actual configuration file being processed.
      *
