@@ -1128,22 +1128,27 @@ public abstract class CMFile {
                 currentLines.add("");
             } else {
                 currentLines.add("");
-                if (str.startsWith("CONFIG_SECTION: ")) {
-                    String section = str.split(": ")[1];
-                    StringBuilder length = new StringBuilder();
-                    length.append("###");
-                    for (int j = 0; j < section.length(); j++) {
-                        length.append("#");
+                String[] rawComment = str.split("\n");
+                for (String commentPart : rawComment) {
+                    if (commentPart.isEmpty()) {
+                        currentLines.add("");
+                    } else {
+                        if (commentPart.startsWith("CONFIG_SECTION: ")) {
+                            String section = commentPart.split(": ")[1];
+                            StringBuilder length = new StringBuilder();
+                            length.append("###");
+                            for (int j = 0; j < section.length(); j++) {
+                                length.append("#");
+                            }
+                            length.append("###");
+                            currentLines.add(length.toString());
+                            currentLines.add("#  " + section + "  #");
+                            currentLines.add(length.toString());
+                        } else {
+                            currentLines.add("# " + commentPart);
+                        }
                     }
-                    length.append("###");
-                    currentLines.add(length.toString());
-                    currentLines.add("#  " + section + "  #");
-                    currentLines.add(length.toString());
-                    currentLines.add("");
-                } else {
-                    currentLines.add("# " + str);
                 }
-
             }
         }
     }
