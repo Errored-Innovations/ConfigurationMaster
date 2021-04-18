@@ -57,6 +57,8 @@ public abstract class CMFile {
     private File folder;
     // The name of the config file.
     private String name;
+    // Pending values to be moved to this file.
+    private HashMap<String, Object> toBeMoved;
 
     private int defaultTitleWidth;
     @Nullable
@@ -93,6 +95,7 @@ public abstract class CMFile {
         this.name = name;
 
         config = null;
+        toBeMoved = new HashMap<>();
 
         defaultTitleWidth = 75;
         title = "-<( " + plugin.getName() + " )>-";
@@ -1064,7 +1067,7 @@ public abstract class CMFile {
      * Afterwards, the old path is removed.
      *
      * @param oldPath the currently existing path that needs to be moved.
-     * @param newPath the new path to be moved to.
+     * @param newPath the new path that the option is to be moved to.
      */
     public void moveTo(@NotNull String oldPath, @NotNull String newPath) {
         if (config == null) {
@@ -1078,6 +1081,38 @@ public abstract class CMFile {
         }
     }
 
+    /**
+     * Moves an option from an old path to a new one in a different file.<br><br>
+     *
+     * Afterwards, the old path in the previous file (this one) is removed.
+     *
+     * @param oldPath the currently existing path that needs to be moved.
+     * @param newPath the new path that the option is to be moved to.
+     * @param newFile the new file that will contain the new path.
+     */
+    public void moveTo(@NotNull String oldPath, @NotNull String newPath, @NotNull CMFile newFile) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loading yet, please use moveTo within the moveToNew method.");
+        }
+        if (config.contains(oldPath)) {
+            Object object = config.get(oldPath);
+            newFile.toBeMoved.put(newPath, object);
+            config.set(oldPath, null);
+        }
+    }
+
+    /**
+     * Used to handle all transferring values.
+     *
+     * @see #moveTo(String, String)
+     * @see #moveTo(String, String, CMFile)
+     */
+    public void handleReceivingValues() {
+        for (String path : toBeMoved.keySet()) {
+            tempConfig.set(path, toBeMoved.get(path));
+        }
+        toBeMoved.clear();
+    }
     /**
      * The actual configuration file being processed.
      *
