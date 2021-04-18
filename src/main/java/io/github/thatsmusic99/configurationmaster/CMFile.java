@@ -742,6 +742,309 @@ public abstract class CMFile {
     }
 
     /**
+     * Returns an integer value specified at the given path. If an integer value is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The integer stored in path, returns defaultValue if not found.
+     */
+    public int getInteger(@NotNull String path, int defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Integer.parseInt(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns an integer value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public int getInteger(@NotNull String path) {
+        return getInteger(path, 0);
+    }
+
+    /**
+     * Returns a double value specified at the given path. If a double value is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The double stored in path, returns defaultValue if not found.
+     */
+    public double getDouble(@NotNull String path, double defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Double.parseDouble(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a double value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public double getDouble(@NotNull String path) {
+        return getDouble(path, 0);
+    }
+
+    /**
+     * Returns a float value specified at the given path. If a float value is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The float stored in path, returns defaultValue if not found.
+     */
+    public float getFloat(@NotNull String path, float defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Float.parseFloat(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a float value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public float getFloat(@NotNull String path) {
+        return getFloat(path, 0);
+    }
+
+    /**
+     * Returns a string specified at the given path. If the path does not exist, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The string stored in path, returns defaultValue if not found.
+     */
+    public String getString(@NotNull String path, @Nullable String defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        return config.getString(path);
+    }
+
+    /**
+     * Returns a string value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns null.
+     */
+    @Nullable
+    public String getString(@NotNull String path) {
+        return getString(path, null);
+    }
+
+    /**
+     * Returns an object specified at the given path. If the path does not exist, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The object stored in path, returns defaultValue if not found.
+     */
+    public Object get(@NotNull String path, @Nullable Object defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        return config.get(path, defaultValue);
+    }
+
+    /**
+     * Returns an object value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns null.
+     */
+    public Object get(@NotNull String path) {
+        return get(path, null);
+    }
+
+    /**
+     * Returns a long specified at the given path. If a long value is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The long stored in path, returns defaultValue if not found.
+     */
+    public long getLong(@NotNull String path, long defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Long.parseLong(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a long value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public long getLong(@NotNull String path) {
+        return getLong(path, 0);
+    }
+
+    /**
+     * Returns a byte specified at the given path. If a byte is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The byte stored in path, returns defaultValue if not found.
+     */
+    public byte getByte(@NotNull String path, byte defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Byte.parseByte(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a byte value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public byte getByte(@NotNull String path) {
+        return getByte(path, (byte) 0);
+    }
+
+    /**
+     * Returns a short specified at the given path. If a short is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The short stored in path, returns defaultValue if not found.
+     */
+    public short getShort(@NotNull String path, short defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Short.parseShort(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a short value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns 0.
+     */
+    public short getShort(@NotNull String path) {
+        return getShort(path, (short) 0);
+    }
+
+    /**
+     * Returns a boolean specified at the given path. If a boolean is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The boolean stored in path, returns defaultValue if not found.
+     */
+    public boolean getBoolean(@NotNull String path, boolean defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        try {
+            return Boolean.parseBoolean(getString(path));
+        } catch (NumberFormatException | NullPointerException ex) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns a boolean value specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns false.
+     */
+    public boolean getBoolean(@NotNull String path) {
+        return getBoolean(path, false);
+    }
+
+    /**
+     * Returns a list specified at the given path. If a list is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The list stored in path, returns defaultValue if not found.
+     */
+    public List<?> getList(@NotNull String path, List<?> defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        return config.getList(path, defaultValue);
+    }
+
+    /**
+     * Returns a list specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The list stored in the path. If not found, it returns a new empty ArrayList.
+     */
+    public List<?> getList(@NotNull String path) {
+        return getList(path, new ArrayList<>());
+    }
+
+    /**
+     * Returns a list of strings specified at the given path. If such a list is not found, the specified default value is returned.
+     *
+     * @param path The path to be used.
+     * @param defaultValue The value to be returned if one is not found at the specified path.
+     * @return The list stored in path, returns defaultValue if not found.
+     */
+    public List<String> getStringList(@NotNull String path, List<String> defaultValue) {
+        if (config == null) {
+            throw new NullPointerException("Configuration is not loaded yet, please use this method after calling the load method.");
+        }
+        if (!config.contains(path)) return defaultValue;
+        if (!(config.get(path) instanceof List)) return defaultValue;
+        return config.getStringList(path);
+    }
+
+    /**
+     * Returns a list of strings specified at the given path.
+     *
+     * @param path The path to be used.
+     * @return The value stored in the path. If not found, it returns a new empty ArrayList.
+     */
+    public List<String> getStringList(@NotNull String path) {
+        return getStringList(path, new ArrayList<>());
+    }
+
+    /**
      * Anything that the plugin may want to do after finishing the loading
      * process.
      */
