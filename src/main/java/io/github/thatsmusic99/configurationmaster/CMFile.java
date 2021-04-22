@@ -719,7 +719,11 @@ public abstract class CMFile {
         comments.put(path.split("\\.")[0], builder.toString());
         builder = new StringBuilder();
         builder.append(comment);
-        comments.put(path, builder.toString());
+        if (comments.containsKey(path)) {
+            comments.put(path, comments.get(path) + builder.toString());
+        } else {
+            comments.put(path, builder.toString());
+        }
     }
 
     /**
