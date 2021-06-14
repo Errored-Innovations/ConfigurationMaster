@@ -45,5 +45,10 @@
             <version>13.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.28</version>
+        </dependency>
     </dependencies>
 </project>
