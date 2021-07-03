@@ -30,7 +30,12 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         CMMemorySection cmSection = getSectionInternal(path);
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = path.substring(path.lastIndexOf('.') + 1);
+        // Move comments to parent option
         List<String> comments = Lists.newArrayList(getParent().getPendingComments());
+        String parentSection = path.substring(0, path.indexOf('.') == -1 ? path.length() : path.indexOf('.'));
+        addComments(parentSection, comments.toArray(new String[]{}));
+        comments.clear();
+        // Then handle the comments for the actual option
         if (getParent().getComments().containsKey(path)) {
             comments.add(getParent().getComments().get(path));
         }
