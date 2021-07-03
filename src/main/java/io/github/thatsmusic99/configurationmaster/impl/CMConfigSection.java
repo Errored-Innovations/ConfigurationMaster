@@ -152,7 +152,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             } else if (option instanceof CMConfigSection) {
                 toEdit = (CMConfigSection) option;
             } else {
-                return null;
+                throw new IllegalStateException(path + " cannot be made into a configuration section due to already containing data!");
             }
         }
         return toEdit;
