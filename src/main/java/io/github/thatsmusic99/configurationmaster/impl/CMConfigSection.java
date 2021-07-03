@@ -39,6 +39,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (getParent().getComments().containsKey(path)) {
             comments.add(getParent().getComments().get(path));
         }
+        // TODO - should probably be done using objects
         if (section != null) {
             comments.add("CONFIG_SECTION: " + section);
         }
