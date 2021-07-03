@@ -88,13 +88,12 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         newCmSection.actualValues.put(newKey, movingValue);
     }
 
-    public void addComment(String path, @NotNull String comment) {
-        String key = path.substring(path.lastIndexOf('.') + 1);
+    public void addComment(@NotNull String path, @NotNull String comment) {
         if (getParent().getComments().containsKey(path)) {
             String newComment = getParent().getComments().get(path) + "\n\n" + comment;
-            getParent().getComments().put(getPathWithKey(key), newComment);
+            getParent().getComments().put(path, newComment);
         } else {
-            getParent().getComments().put(getPathWithKey(key), comment);
+            getParent().getComments().put(path, comment);
         }
     }
 
