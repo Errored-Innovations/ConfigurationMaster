@@ -97,6 +97,16 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         }
     }
 
+    public void addComments(@NotNull String path, @NotNull String... comments) {
+        if (comments.length == 0) return;
+        StringBuilder builder = new StringBuilder();
+        builder.append(comments[0]);
+        for (int i = 1; i < comments.length; i++) {
+            builder.append("\n\n").append(comments[i]);
+        }
+        addComment(path, builder.toString());
+    }
+
     public void addExample(@NotNull String path, Object object) {
         addExample(path, object, null);
     }

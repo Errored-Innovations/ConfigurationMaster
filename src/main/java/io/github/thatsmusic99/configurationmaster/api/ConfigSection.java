@@ -15,6 +15,8 @@ public interface ConfigSection extends MemorySection {
 
     void addComment(@NotNull String comment);
 
+    void addComments(@NotNull String path, @NotNull String... comments);
+
     void moveTo(@NotNull String oldPath, @NotNull String newPath);
 
     void moveTo(@NotNull String oldPath, @NotNull String newPath, @NotNull ConfigFile otherFile);
