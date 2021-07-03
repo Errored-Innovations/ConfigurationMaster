@@ -33,7 +33,9 @@ import java.util.*;
  * conventions and to make it easier for others to use and understand.
  *
  * @author Holly (Thatsmusic99)
+ * @deprecated Please use the ConfigFile class instead.
  */
+@Deprecated
 public abstract class CMFile {
 
     // The actual configuration file.
@@ -1124,9 +1126,9 @@ public abstract class CMFile {
      *
      * @return The config file as a FileConfiguration object.
      */
-    @Nullable
+    @Deprecated
     public FileConfiguration getConfig() {
-        return config;
+        return YamlConfiguration.loadConfiguration(configFile);
     }
 
     /**
