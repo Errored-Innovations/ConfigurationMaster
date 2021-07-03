@@ -64,15 +64,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void moveTo(@NotNull String oldPath, @NotNull String newPath) {
-        if (!contains(oldPath)) return;
-        CMMemorySection oldCmSection = getSectionInternal(oldPath);
-        if (oldCmSection == null) return;
-        CMMemorySection newCmSection = getSectionInternal(newPath);
-        if (newCmSection == null) newCmSection = createSectionInternal(newPath);
-        String oldKey = oldPath.substring(oldPath.lastIndexOf('.') + 1);
-        Object movingValue = oldCmSection.existingValues.get(oldKey);
-        String newKey = newPath.substring(newPath.lastIndexOf('.') + 1);
-        newCmSection.actualValues.put(newKey, movingValue);
+        moveTo(oldPath, newPath, getParent());
     }
 
     @Override
