@@ -3,7 +3,7 @@ package io.github.thatsmusic99.configurationmaster.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface ConfigSection {
+public interface ConfigSection extends MemorySection {
 
     void addDefault(@NotNull String path, @Nullable Object value);
 
@@ -24,4 +24,6 @@ public interface ConfigSection {
     void addExample(@NotNull String path, @Nullable Object value);
 
     void addExample(@NotNull String path, @Nullable Object value, @Nullable String comment);
+
+    ConfigSection createConfigSection(@NotNull String path);
 }
