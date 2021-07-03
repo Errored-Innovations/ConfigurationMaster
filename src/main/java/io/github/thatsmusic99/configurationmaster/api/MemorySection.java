@@ -62,11 +62,13 @@ public interface MemorySection {
 
     float getFloat(@NotNull String path, float defaultValue);
 
-    default ConfigSection getSection(@NotNull String path) {
-        return getSection(path, null);
+    default ConfigSection getConfigSection(@NotNull String path) {
+        return getConfigSection(path, null);
     }
 
-    ConfigSection getSection(@NotNull String path, @Nullable ConfigSection defaultValue);
+    ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue);
+
+    boolean contains(@NotNull String path);
 
     @NotNull
     default <T> List<T> getList(@NotNull String path) {
@@ -81,5 +83,8 @@ public interface MemorySection {
     <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue);
 
     void set(@NotNull String path, @Nullable Object object);
+
+    List<String> getKeys(boolean deep);
+
 
 }
