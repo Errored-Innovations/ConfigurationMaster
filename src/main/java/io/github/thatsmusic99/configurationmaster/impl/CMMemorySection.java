@@ -6,7 +6,10 @@ import io.github.thatsmusic99.configurationmaster.api.MemorySection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class CMMemorySection implements MemorySection {
 
@@ -157,6 +160,10 @@ public class CMMemorySection implements MemorySection {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) section = getParent().createConfigSection(path);
         String key = path.substring(path.lastIndexOf('.') + 1);
+        if (object == null && section.actualValues.containsKey(key)) {
+            section.actualValues.remove(key);
+            return;
+        }
         section.actualValues.put(key, object);
     }
 
