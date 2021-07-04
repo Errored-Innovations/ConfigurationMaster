@@ -86,9 +86,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void addComment(@NotNull String path, @NotNull String comment) {
         if (getParent().getComments().containsKey(path)) {
             String newComment = getParent().getComments().get(path) + "\n\n" + comment;
-            getParent().getComments().put(path, newComment);
+            getParent().getComments().put(getPathWithKey(path), newComment);
         } else {
-            getParent().getComments().put(path, comment);
+            getParent().getComments().put(getPathWithKey(path), comment);
         }
     }
 
@@ -114,7 +114,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
                 if (!section.existingValues.containsKey(key)) return;
             }
         }
-        getParent().getExamples().add(path);
+        getParent().getExamples().add(getPathWithKey(path));
         addDefault(path, object, null, comment);
     }
 
@@ -170,9 +170,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             String key = keyObj.toString();
             Object value = map.get(keyObj);
             if (value instanceof Map) {
-                CMConfigSection section = new CMConfigSection(
-                        getPath().length() == 0 ? key : "." + key, getParent());
                 section.mapToCM((Map) value);
+                CMConfigSection section = new CMConfigSection(getPathWithKey(key), getParent());
                 existingValues.put(key, section);
             } else {
                 existingValues.put(key, value);
