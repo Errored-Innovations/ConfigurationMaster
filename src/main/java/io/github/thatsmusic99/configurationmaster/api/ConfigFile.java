@@ -102,7 +102,7 @@ public class ConfigFile extends CMConfigSection {
     }
 
     public void loadFromString(String str) {
-        Map map = this.yaml.load(str);
+        Map<?, ?> map = this.yaml.load(str);
         if (map != null) {
             mapToCM(map);
         }

@@ -171,13 +171,13 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         return map;
     }
 
-    public void mapToCM(Map map) {
+    public void mapToCM(Map<?, ?> map) {
         for (Object keyObj : map.keySet()) {
             String key = keyObj.toString();
             Object value = map.get(keyObj);
             if (value instanceof Map) {
-                section.mapToCM((Map) value);
                 CMConfigSection section = new CMConfigSection(getPathWithKey(key), getParent());
+                section.mapToCM((Map<?, ?>) value);
                 existingValues.put(key, section);
             } else {
                 existingValues.put(key, value);
