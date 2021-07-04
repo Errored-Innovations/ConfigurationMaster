@@ -119,10 +119,16 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     public void makeSectionLenient(String path) {
-        CMMemorySection section = getSectionInternal(path);
-        if (section == null) section = createSectionInternal(path);
-        String key = path.substring(path.lastIndexOf('.') + 1);
-        section.actualValues.put(key, section.existingValues.getOrDefault(key, createConfigSection(path)));
+        CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
+        if (section == null) section = createSectionInternal(path + ".haha");
+        for (String key : section.existingValues.keySet()) {
+            if (section.existingValues.get(key) instanceof CMConfigSection) {
+                section.makeSectionLenient(key);
+            }
+            section.actualValues.put(key, section.existingValues.get(key));
+        }
+        if (getParent().getLenientSections().contains(getPathWithKey(path))) return;
+        getParent().getLenientSections().add(getPathWithKey(path));
     }
 
     public void addSection(@NotNull String section) {
