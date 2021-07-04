@@ -27,6 +27,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     public void addDefault(@NotNull String path, Object defaultOption, @Nullable String section, @Nullable String comment) {
+        //
+        String fullPath = getPathWithKey(path);
         CMMemorySection cmSection = getSectionInternal(path);
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = path.substring(path.lastIndexOf('.') + 1);
@@ -36,8 +38,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         addComments(parentSection, comments.toArray(new String[]{}));
         comments.clear();
         // Then handle the comments for the actual option
-        if (getParent().getComments().containsKey(path)) {
-            comments.add(getParent().getComments().get(path));
+        if (getParent().getComments().containsKey(fullPath)) {
+            comments.add(getParent().getComments().get(fullPath));
         }
         // TODO - should probably be done using objects
         if (section != null) {
@@ -53,7 +55,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             for (int i = 1; i < comments.size(); i++) {
                 builder.append("\n\n").append(comments.get(i));
             }
-            getParent().getComments().put(path, builder.toString());
+            getParent().getComments().put(fullPath, builder.toString());
         }
         cmSection.defaults.put(key, defaultOption);
         cmSection.actualValues.put(key, cmSection.existingValues.getOrDefault(key, defaultOption));
