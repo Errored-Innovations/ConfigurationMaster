@@ -173,7 +173,14 @@ public class CMMemorySection implements MemorySection {
         while (path.indexOf('.') != -1 && section != null) {
             String key = path.substring(0, path.indexOf('.'));
             path = path.substring(path.indexOf('.') + 1);
-            section = (CMMemorySection) section.getConfigSection(key);
+            CMMemorySection tempSection;
+            if (section.existingValues.get(key) instanceof CMConfigSection) {
+                tempSection = (CMMemorySection) section.getConfigSection(key, (CMConfigSection) section.existingValues.get(key));
+            } else {
+                tempSection = (CMMemorySection) section.getConfigSection(key);
+            }
+            section.actualValues.putIfAbsent(key, tempSection);
+            section = tempSection;
         }
         return section;
     }

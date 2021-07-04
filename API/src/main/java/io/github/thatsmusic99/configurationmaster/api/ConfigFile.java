@@ -13,10 +13,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigFile extends CMConfigSection {
 
@@ -89,10 +86,9 @@ public class ConfigFile extends CMConfigSection {
 
         StringBuilder content = new StringBuilder();
         try {
-            String line = reader.readLine();
-            while (line != null) {
+            String line;
+            while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
-                line = reader.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,11 +105,8 @@ public class ConfigFile extends CMConfigSection {
     }
 
     public void save() throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        try {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(saveToString());
-        } finally {
-            writer.close();
         }
     }
 

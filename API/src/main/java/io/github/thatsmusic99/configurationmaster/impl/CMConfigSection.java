@@ -1,12 +1,15 @@
 package io.github.thatsmusic99.configurationmaster.impl;
 
 import com.google.common.collect.Lists;
-import io.github.thatsmusic99.configurationmaster.api.ConfigSection;
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
+import io.github.thatsmusic99.configurationmaster.api.ConfigSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
