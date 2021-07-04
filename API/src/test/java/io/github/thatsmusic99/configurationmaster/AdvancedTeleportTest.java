@@ -1,6 +1,5 @@
 package io.github.thatsmusic99.configurationmaster;
 
-import com.google.common.collect.Lists;
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
 import org.junit.Assert;
 import org.junit.Test;
@@ -297,6 +296,6 @@ public class AdvancedTeleportTest {
         config.set("cooldown-duration", "60");
         Assert.assertEquals("60", config.getString("cooldown-duration"));
         Assert.assertEquals(60, config.getInteger("cooldown-duration"));
-        Assert.assertEquals(Lists.newArrayList(), config.getList("disabled-commands"));
+        Assert.assertEquals(new ArrayList<>(), config.getList("disabled-commands"));
     }
 }

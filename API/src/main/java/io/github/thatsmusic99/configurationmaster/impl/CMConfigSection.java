@@ -1,15 +1,11 @@
 package io.github.thatsmusic99.configurationmaster.impl;
 
-import com.google.common.collect.Lists;
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
 import io.github.thatsmusic99.configurationmaster.api.ConfigSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
@@ -36,7 +32,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = path.substring(path.lastIndexOf('.') + 1);
         // Move comments to parent option
-        List<String> comments = Lists.newArrayList(getParent().getPendingComments());
+        List<String> comments = new ArrayList<>(getParent().getPendingComments());
         String parentSection = path.substring(0, path.indexOf('.') == -1 ? path.length() : path.indexOf('.'));
         addComments(parentSection, comments.toArray(new String[]{}));
         comments.clear();

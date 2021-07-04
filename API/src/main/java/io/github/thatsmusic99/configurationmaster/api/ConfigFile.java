@@ -1,13 +1,11 @@
 package io.github.thatsmusic99.configurationmaster.api;
 
-import com.google.common.collect.Lists;
 import io.github.thatsmusic99.configurationmaster.impl.CMConfigSection;
-import org.bukkit.configuration.file.YamlConstructor;
-import org.bukkit.configuration.file.YamlRepresenter;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -20,7 +18,7 @@ public class ConfigFile extends CMConfigSection {
     private final Yaml yaml;
     private final DumperOptions yamlOptions = new DumperOptions();
     private final LoaderOptions loaderOptions = new LoaderOptions();
-    private final Representer yamlRepresenter = new YamlRepresenter();
+    private final Representer yamlRepresenter = new Representer();
     private final File file;
     private boolean isNew = false;
     private CommentWriter writer;
@@ -35,7 +33,7 @@ public class ConfigFile extends CMConfigSection {
      * @param file The config file to be loaded.
      */
     public ConfigFile(@NotNull File file) {
-        yaml = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions, loaderOptions);
+        yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions, loaderOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -139,7 +137,7 @@ public class ConfigFile extends CMConfigSection {
         if (dump.equals("{}")) {
             dump = "";
         }
-        writer.writeComments(Lists.newArrayList(dump.split("\n")));
+        writer.writeComments(new ArrayList<>(Arrays.asList(dump.split("\n"))));
         StringBuilder result = new StringBuilder();
         for (String line : writer.getLines()) {
             result.append(line).append("\n");
