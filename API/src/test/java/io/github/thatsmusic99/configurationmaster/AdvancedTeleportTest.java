@@ -15,10 +15,9 @@ public class AdvancedTeleportTest {
     @Test
     public void initATConfig() throws IOException {
         File file = new File("test-config.yml");
-        if (file.exists()) {
-            file.delete();
+        if (!file.exists()) {
+            file.createNewFile();
         }
-        file.createNewFile();
         ConfigFile config = ConfigFile.loadConfig(file);
 
         config.addComment("Another comment at the very top for all you lads :)");
@@ -276,6 +275,7 @@ public class AdvancedTeleportTest {
                 "Do not enable this if you are unsure of the risks this option proposes.");
 
         config.save();
+        System.out.println("Intermission");
         config.reload();
 
         Assert.assertTrue(config.getBoolean("use-basic-teleport-features"));
