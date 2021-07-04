@@ -94,6 +94,9 @@ public abstract class CMFile {
      * @param name The name of the config file.
      */
     public CMFile(Plugin plugin, File folder, String name) {
+        plugin.getLogger().severe("This plugin is using the CMFile class in ConfigurationMaster. " +
+                "This class is being removed in the next major release as it has been replaced by the standalone ConfigFile." +
+                "Please urge the developer to update their ConfigurationMaster code as soon as possible.");
         this.plugin = plugin;
         this.folder = folder;
         this.name = name;
