@@ -182,4 +182,14 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (getPath().isEmpty()) return key;
         return getPath() + "." + key;
     }
+
+    protected void addDefaults(HashMap<String, Object> map) {
+        for (String key : actualValues.keySet()) {
+            if (actualValues.get(key) instanceof CMConfigSection) {
+                ((CMConfigSection) actualValues.get(key)).addDefaults(map);
+            } else {
+                map.put(getPathWithKey(key), defaults.get(key));
+            }
+        }
+    }
 }

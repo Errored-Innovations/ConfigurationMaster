@@ -30,6 +30,7 @@ public class ConfigFile extends CMConfigSection {
     protected List<String> pendingComments;
     protected HashMap<String, String> comments;
     protected List<String> examples;
+    protected List<String> lenientSections;
 
     /**
      * Used to load a config file without safety precautions taken by the API.
@@ -46,6 +47,7 @@ public class ConfigFile extends CMConfigSection {
         pendingComments = new ArrayList<>();
         comments = new HashMap<>();
         examples = new ArrayList<>();
+        lenientSections = new ArrayList<>();
         loadWithExceptions();
     }
 
@@ -116,14 +118,22 @@ public class ConfigFile extends CMConfigSection {
     }
 
     public void reload() throws IOException {
-        actualValues.clear();
+        HashMap<String, Object> allDefaults = new LinkedHashMap<>();
+        addDefaults(allDefaults);
         existingValues.clear();
+        actualValues.clear();
         loadWithExceptions();
-        for (String defaultOption : defaults.keySet()) {
-            if (!examples.contains(defaultOption)) {
-                addDefault(defaultOption, defaults.get(defaultOption));
+
+        for (String path : allDefaults.keySet()) {
+            if (!examples.contains(path) || contains(path)) {
+                addDefault(path, allDefaults.get(path));
             }
         }
+
+        for (String section : lenientSections) {
+            makeSectionLenient(section);
+        }
+
         save();
     }
 
@@ -154,5 +164,9 @@ public class ConfigFile extends CMConfigSection {
 
     public List<String> getExamples() {
         return examples;
+    }
+
+    public List<String> getLenientSections() {
+        return lenientSections;
     }
 }
