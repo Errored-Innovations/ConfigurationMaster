@@ -68,7 +68,7 @@ public class ConfigFile extends CMConfigSection {
         }
     }
 
-    public void loadWithExceptions() {
+    private void loadWithExceptions() {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
@@ -95,7 +95,7 @@ public class ConfigFile extends CMConfigSection {
         loadFromString(content.toString());
     }
 
-    public void loadFromString(String str) {
+    private void loadFromString(String str) {
         Map<?, ?> map = this.yaml.load(str);
         if (map != null) {
             mapToCM(map);
@@ -132,7 +132,7 @@ public class ConfigFile extends CMConfigSection {
         return isNew;
     }
 
-    public String saveToString() {
+    private String saveToString() {
         String dump = this.yaml.dump(convertToMap());
         if (dump.equals("{}")) {
             dump = "";
