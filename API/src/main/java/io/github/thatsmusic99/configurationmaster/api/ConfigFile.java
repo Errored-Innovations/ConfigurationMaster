@@ -116,7 +116,7 @@ public class ConfigFile extends CMConfigSection {
         loadWithExceptions();
 
         for (String path : allDefaults.keySet()) {
-            if (!examples.contains(path) || contains(path)) {
+            if (!examples.contains(path) || containsExisting(path)) {
                 addDefault(path, allDefaults.get(path));
             }
         }

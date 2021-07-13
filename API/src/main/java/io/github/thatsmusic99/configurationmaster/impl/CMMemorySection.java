@@ -140,6 +140,13 @@ public class CMMemorySection implements MemorySection {
         return section.actualValues.containsKey(key);
     }
 
+    protected boolean containsExisting(String path) {
+        CMMemorySection section = getSectionInternal(path);
+        if (section == null) return false;
+        String key = path.substring(path.lastIndexOf('.') + 1);
+        return section.existingValues.containsKey(key);
+    }
+
     @Override
     public <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue) {
         CMMemorySection section = getSectionInternal(path);

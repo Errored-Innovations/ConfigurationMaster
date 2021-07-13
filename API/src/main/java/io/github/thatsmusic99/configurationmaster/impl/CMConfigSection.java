@@ -121,9 +121,6 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
         if (section == null) section = createSectionInternal(path + ".haha");
         for (String key : section.existingValues.keySet()) {
-            if (section.existingValues.get(key) instanceof CMConfigSection) {
-                section.makeSectionLenient(key);
-            }
             section.actualValues.put(key, section.existingValues.get(key));
         }
         if (getParent().getLenientSections().contains(getPathWithKey(path))) return;
