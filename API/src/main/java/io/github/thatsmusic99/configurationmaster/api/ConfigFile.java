@@ -24,7 +24,7 @@ public class ConfigFile extends CMConfigSection {
     private CommentWriter writer;
     protected List<String> pendingComments;
     protected HashMap<String, String> comments;
-    protected List<String> examples;
+    protected HashSet<String> examples;
     protected List<String> lenientSections;
 
     /**
@@ -41,7 +41,7 @@ public class ConfigFile extends CMConfigSection {
         writer = new CommentWriter(this);
         pendingComments = new ArrayList<>();
         comments = new HashMap<>();
-        examples = new ArrayList<>();
+        examples = new HashSet<>();
         lenientSections = new ArrayList<>();
         loadWithExceptions();
     }
@@ -153,7 +153,7 @@ public class ConfigFile extends CMConfigSection {
         return pendingComments;
     }
 
-    public List<String> getExamples() {
+    public HashSet<String> getExamples() {
         return examples;
     }
 
