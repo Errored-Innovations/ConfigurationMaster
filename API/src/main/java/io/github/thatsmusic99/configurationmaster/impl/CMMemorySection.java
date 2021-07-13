@@ -6,10 +6,7 @@ import io.github.thatsmusic99.configurationmaster.api.MemorySection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 public class CMMemorySection implements MemorySection {
 
@@ -149,7 +146,10 @@ public class CMMemorySection implements MemorySection {
         if (section == null) return defaultValue;
         String key = path.substring(path.lastIndexOf('.') + 1);
         Object value = section.actualValues.getOrDefault(key, defaultValue);
-        if (!(value instanceof List)) {
+        if (value == null) return defaultValue;
+        if (value.getClass().isArray()) {
+            value = Arrays.asList((Object[]) value);
+        } else if (!(value instanceof List)) {
             value = new ArrayList<>(Collections.singletonList(value));
         }
         return (List<T>) value;
