@@ -158,9 +158,12 @@ public class CMMemorySection implements MemorySection {
     @Override
     public void set(@NotNull String path, @Nullable Object object) {
         CMMemorySection section = getSectionInternal(path);
-        if (section == null) section = getParent().createConfigSection(path);
+        if (section == null) {
+            if (object == null) return;
+            section = getParent().createConfigSection(path);
+        }
         String key = path.substring(path.lastIndexOf('.') + 1);
-        if (object == null && section.actualValues.containsKey(key)) {
+        if (object == null) {
             section.actualValues.remove(key);
             return;
         }
