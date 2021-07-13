@@ -120,11 +120,18 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void makeSectionLenient(String path) {
         CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
         if (section == null) section = createSectionInternal(path + ".haha");
-        for (String key : section.existingValues.keySet()) {
-            section.actualValues.put(key, section.existingValues.get(key));
-        }
+        section.forceExistingIntoActual();
         if (getParent().getLenientSections().contains(getPathWithKey(path))) return;
         getParent().getLenientSections().add(getPathWithKey(path));
+    }
+
+    private void forceExistingIntoActual() {
+        for (String key : existingValues.keySet()) {
+            if (existingValues.get(key) instanceof CMConfigSection) {
+                ((CMConfigSection) existingValues.get(key)).forceExistingIntoActual();
+            }
+            actualValues.put(key, existingValues.get(key));
+        }
     }
 
     public void addSection(@NotNull String section) {
