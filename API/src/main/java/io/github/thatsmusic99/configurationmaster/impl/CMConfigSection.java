@@ -109,10 +109,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void addExample(@NotNull String path, Object object, String comment) {
         if (!getParent().isNew()) {
             CMMemorySection section = getSectionInternal(path);
-            if (section != null) {
-                String key = path.substring(path.lastIndexOf('.') + 1);
-                if (!section.existingValues.containsKey(key)) return;
-            }
+            if (section == null) return;
+            String key = path.substring(path.lastIndexOf('.') + 1);
+            if (!section.existingValues.containsKey(key)) return;
         }
         getParent().getExamples().add(getPathWithKey(path));
         addDefault(path, object, null, comment);
