@@ -182,7 +182,7 @@ public class CMMemorySection implements MemorySection {
             } else {
                 tempSection = (CMMemorySection) section.getConfigSection(key);
             }
-            section.actualValues.putIfAbsent(key, tempSection);
+            if (tempSection != null) section.actualValues.putIfAbsent(key, tempSection);
             section = tempSection;
         }
         return section;
