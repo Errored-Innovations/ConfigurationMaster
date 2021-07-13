@@ -128,6 +128,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     public void addSection(@NotNull String section) {
+        // TODO - use objects
         getParent().getPendingComments().add("CONFIG_SECTION: " + section);
     }
 

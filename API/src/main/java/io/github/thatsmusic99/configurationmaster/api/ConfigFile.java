@@ -31,6 +31,8 @@ public class ConfigFile extends CMConfigSection {
      * Used to load a config file without safety precautions taken by the API.
      *
      * @param file The config file to be loaded.
+     * @see ConfigFile#loadConfig(File)
+     * @throws YAMLException if the file being loaded contains syntax errors.
      */
     public ConfigFile(@NotNull File file) {
         yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions, loaderOptions);
@@ -46,6 +48,14 @@ public class ConfigFile extends CMConfigSection {
         loadWithExceptions();
     }
 
+    /**
+     * Used to load a config file with safety precautions taken by the API.<br>
+     * This safety precaution checks for syntax errors in the YAML file.<br>
+     * If there is one, it is renamed and an empty file is loaded.<br>
+     *
+     * @param file The file to be loaded.
+     * @return the ConfigFile instance of the file or backup file.
+     */
     public static ConfigFile loadConfig(File file) {
         try {
             return new ConfigFile(file);
@@ -102,12 +112,22 @@ public class ConfigFile extends CMConfigSection {
         }
     }
 
+    /**
+     * Saves all changes made to the config to the actual file.
+     *
+     * @throws IOException if something went wrong writing to the file.
+     */
     public void save() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(saveToString());
         }
     }
 
+    /**
+     * Reloads the configuration and updates all values stored inside it.<br><br>
+     *
+     * @throws IOException if something went wrong saving the file.
+     */
     public void reload() throws IOException {
         HashMap<String, Object> allDefaults = new LinkedHashMap<>();
         addDefaults(allDefaults);
@@ -128,6 +148,13 @@ public class ConfigFile extends CMConfigSection {
         save();
     }
 
+    /**
+     * Returns whether the loaded file is brand new or not.
+     *
+     * This is determined by whether a new file was created or if the file itself is empty.
+     *
+     * @return true if the file is newly loaded, false if not.
+     */
     public boolean isNew() {
         return isNew;
     }
@@ -149,6 +176,11 @@ public class ConfigFile extends CMConfigSection {
         return comments;
     }
 
+    /**
+     * Get all comments that have yet to be added. These will be added when the next default/example is set.
+     *
+     * @return Comments waiting to be added.
+     */
     public List<String> getPendingComments() {
         return pendingComments;
     }
