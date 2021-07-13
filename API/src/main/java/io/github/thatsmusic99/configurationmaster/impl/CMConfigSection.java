@@ -80,6 +80,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Object movingValue = oldCmSection.existingValues.get(oldKey);
         String newKey = newPath.substring(newPath.lastIndexOf('.') + 1);
         newCmSection.actualValues.put(newKey, movingValue);
+        oldCmSection.set(oldKey, null);
     }
 
     public void addComment(@NotNull String path, @NotNull String comment) {
