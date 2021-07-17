@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -81,11 +82,11 @@ public class ConfigFile extends CMConfigSection {
     private void loadWithExceptions() {
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         } catch (FileNotFoundException ex) {
             try {
                 file.createNewFile();
-                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -118,7 +119,7 @@ public class ConfigFile extends CMConfigSection {
      * @throws IOException if something went wrong writing to the file.
      */
     public void save() throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
             writer.write(saveToString());
         }
     }
