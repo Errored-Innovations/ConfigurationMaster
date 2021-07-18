@@ -60,6 +60,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         cmSection.actualValues.put(key, cmSection.existingValues.getOrDefault(key, defaultOption));
     }
 
+    @Override
     public void addComment(@NotNull String comment) {
         getParent().getPendingComments().add(comment);
     }
@@ -83,6 +84,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         oldCmSection.set(oldKey, null);
     }
 
+    @Override
     public void addComment(@NotNull String path, @NotNull String comment) {
         if (getParent().getComments().containsKey(path)) {
             String newComment = getParent().getComments().get(path) + "\n\n" + comment;
@@ -92,6 +94,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         }
     }
 
+    @Override
     public void addComments(@NotNull String path, @NotNull String... comments) {
         if (comments.length == 0) return;
         StringBuilder builder = new StringBuilder();
@@ -102,10 +105,12 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         addComment(path, builder.toString());
     }
 
+    @Override
     public void addExample(@NotNull String path, Object object) {
         addExample(path, object, null);
     }
 
+    @Override
     public void addExample(@NotNull String path, Object object, String comment) {
         if (!getParent().isNew()) {
             CMMemorySection section = getSectionInternal(path);
@@ -134,6 +139,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         }
     }
 
+    @Override
     public void addSection(@NotNull String section) {
         // TODO - use objects
         getParent().getPendingComments().add("CONFIG_SECTION: " + section);
@@ -143,6 +149,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         return createConfigSection(path.substring(0, path.lastIndexOf('.')));
     }
 
+    @Override
     public CMConfigSection createConfigSection(@NotNull String path) {
         String[] sections = path.split("\\.");
         CMConfigSection toEdit = this;
