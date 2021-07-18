@@ -196,13 +196,13 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Objects.requireNonNull(path, "The path must not be null!");
         String[] sections = path.split("\\.");
         CMConfigSection toEdit = this;
-        for (int i = 0; i < sections.length; i++) {
-            Object option = toEdit.actualValues.get(sections[i]);
+        for (String section : sections) {
+            Object option = toEdit.actualValues.get(section);
             if (option == null) {
                 option = new CMConfigSection(
-                        toEdit.getPath().length() == 0 ? sections[i] : toEdit.getPath() + "." + sections[i],
+                        toEdit.getPath().length() == 0 ? section : toEdit.getPath() + "." + section,
                         toEdit.getParent());
-                toEdit.actualValues.put(sections[i], option);
+                toEdit.actualValues.put(section, option);
                 toEdit = (CMConfigSection) option;
             } else if (option instanceof CMConfigSection) {
                 toEdit = (CMConfigSection) option;
@@ -213,7 +213,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         return toEdit;
     }
 
-    public Map<String, Object> convertToMap() {
+    protected Map<String, Object> convertToMap() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         for (String path : actualValues.keySet()) {
             if (actualValues.get(path) instanceof CMConfigSection) {
@@ -225,7 +225,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         return map;
     }
 
-    public void mapToCM(Map<?, ?> map) {
+    protected void mapToCM(Map<?, ?> map) {
         for (Object keyObj : map.keySet()) {
             String key = keyObj.toString();
             Object value = map.get(keyObj);

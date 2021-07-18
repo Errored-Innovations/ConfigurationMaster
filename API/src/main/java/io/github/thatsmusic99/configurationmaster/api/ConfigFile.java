@@ -22,7 +22,7 @@ public class ConfigFile extends CMConfigSection {
     private final Representer yamlRepresenter = new Representer();
     private final File file;
     private boolean isNew = false;
-    private CommentWriter writer;
+    private final CommentWriter writer;
     private Title title = null;
     protected List<String> pendingComments;
     protected HashMap<String, String> comments;

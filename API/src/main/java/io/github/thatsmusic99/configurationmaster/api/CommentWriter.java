@@ -3,7 +3,7 @@ package io.github.thatsmusic99.configurationmaster.api;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommentWriter {
+class CommentWriter {
 
     private final ConfigFile config;
     // The currently written lines of the file.
@@ -21,38 +21,36 @@ public class CommentWriter {
         this.currentLines = currentLines;
         // For each comment to be made...
         for (String path : config.getComments().keySet()) {
-            // Get all the divisions made in the config
-            String[] divisions = path.split("\\.");
-
-            writeComment(path, divisions, 0, 0);
+            // Write the comment at the specified path
+            writeComment(path, path.split("\\."), 0, 0);
         }
 
         // However, if there's any comments left, write them in.
         for (String str : config.getPendingComments()) {
             if (str.isEmpty()) {
                 currentLines.add("");
-            } else {
-                currentLines.add("");
-                String[] rawComment = str.split("\n");
-                for (String commentPart : rawComment) {
-                    if (commentPart.isEmpty()) {
-                        currentLines.add("");
-                    } else {
-                        if (commentPart.startsWith("CONFIG_SECTION: ")) {
-                            String section = commentPart.split(": ")[1];
-                            StringBuilder length = new StringBuilder();
-                            length.append("###");
-                            for (int j = 0; j < section.length(); j++) {
-                                length.append("#");
-                            }
-                            length.append("###");
-                            currentLines.add(length.toString());
-                            currentLines.add("#  " + section + "  #");
-                            currentLines.add(length.toString());
-                        } else {
-                            currentLines.add("# " + commentPart);
-                        }
+                continue;
+            }
+            currentLines.add("");
+            String[] rawComment = str.split("\n");
+            for (String commentPart : rawComment) {
+                if (commentPart.isEmpty()) {
+                    currentLines.add("");
+                    continue;
+                }
+                if (commentPart.startsWith("CONFIG_SECTION: ")) {
+                    String section = commentPart.split(": ")[1];
+                    StringBuilder length = new StringBuilder();
+                    length.append("###");
+                    for (int j = 0; j < section.length(); j++) {
+                        length.append("#");
                     }
+                    length.append("###");
+                    currentLines.add(length.toString());
+                    currentLines.add("#  " + section + "  #");
+                    currentLines.add(length.toString());
+                } else {
+                    currentLines.add("# " + commentPart);
                 }
             }
         }
@@ -121,7 +119,7 @@ public class CommentWriter {
         }
     }
 
-    public List<String> getLines() {
+    protected List<String> getLines() {
         return currentLines;
     }
 }
