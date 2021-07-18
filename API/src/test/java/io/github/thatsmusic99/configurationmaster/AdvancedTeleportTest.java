@@ -1,6 +1,7 @@
 package io.github.thatsmusic99.configurationmaster;
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
+import io.github.thatsmusic99.configurationmaster.api.Title;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,6 +19,17 @@ public class AdvancedTeleportTest {
             file.createNewFile();
         }
         ConfigFile config = ConfigFile.loadConfig(file);
+        config.setTitle(new Title().withWidth(100).addSolidLine()
+                .addLine("-<( AdvancedTeleport )>-", Title.Pos.CENTER)
+                .addLine("Made by Niestrat99 and Thatsmusic99", Title.Pos.CENTER)
+                .addLine("")
+                .addSolidLine('-')
+                .addLine("A rapidly growing teleportation plugin looking to break the boundaries of traditional teleport plugins.")
+                .addLine("")
+                .addLine("SpigotMC - https://www.spigotmc.org/resources/advanced-teleport.64139/")
+                .addLine("Wiki - https://github.com/Niestrat99/AT-Rewritten/wiki")
+                .addLine("Discord - https://discord.gg/mgWbbN4")
+                .addSolidLine());
 
         config.addComment("Another comment at the very top for all you lads :)");
         config.addDefault("use-basic-teleport-features", true, "Features", "Whether basic teleportation features should be enabled or not." +
