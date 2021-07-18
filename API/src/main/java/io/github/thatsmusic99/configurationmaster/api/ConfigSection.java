@@ -33,5 +33,7 @@ public interface ConfigSection extends MemorySection {
 
     void forceExample(@NotNull String path, @Nullable Object value, @Nullable String comment);
 
+    void makeSectionLenient(@NotNull String path);
+
     ConfigSection createConfigSection(@NotNull String path);
 }

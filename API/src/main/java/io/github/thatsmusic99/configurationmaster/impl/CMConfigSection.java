@@ -133,7 +133,6 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         createConfigSection(path);
     }
 
-    public void makeSectionLenient(String path) {
     @Override
     public void forceExample(@NotNull String path, @Nullable Object value) {
         forceExample(path, value, null);
@@ -145,6 +144,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         addDefault(path, value, null, comment);
     }
 
+    @Override
+    public void makeSectionLenient(@NotNull String path) {
         CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
         if (section == null) section = createSectionInternal(path + ".haha");
         section.forceExistingIntoActual();
