@@ -7,9 +7,9 @@ public interface ConfigSection extends MemorySection {
 
     void addDefault(@NotNull String path, @Nullable Object value);
 
-    void addDefault(@NotNull String path, @Nullable Object value, @NotNull String comment);
+    void addDefault(@NotNull String path, @Nullable Object value, @Nullable String comment);
 
-    void addDefault(@NotNull String path, @Nullable Object value, @NotNull String section, @NotNull String comment);
+    void addDefault(@NotNull String path, @Nullable Object value, @Nullable String section, @Nullable String comment);
 
     void addComment(@NotNull String path, @NotNull String comment);
 

@@ -17,15 +17,15 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         super(path, file);
     }
 
-    public void addDefault(@NotNull String path, Object defaultOption) {
+    public void addDefault(@NotNull String path, @Nullable Object defaultOption) {
         addDefault(path, defaultOption, null, null);
     }
 
-    public void addDefault(@NotNull String path, Object defaultOption, @NotNull String comment) {
+    public void addDefault(@NotNull String path, @Nullable Object defaultOption, @Nullable String comment) {
         addDefault(path, defaultOption, null, comment);
     }
 
-    public void addDefault(@NotNull String path, Object defaultOption, @Nullable String section, @Nullable String comment) {
+    public void addDefault(@NotNull String path, @Nullable Object defaultOption, @Nullable String section, @Nullable String comment) {
         //
         String fullPath = getPathWithKey(path);
         CMMemorySection cmSection = getSectionInternal(path);
