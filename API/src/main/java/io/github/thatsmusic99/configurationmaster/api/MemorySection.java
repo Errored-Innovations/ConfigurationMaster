@@ -86,5 +86,7 @@ public interface MemorySection {
 
     List<String> getKeys(boolean deep);
 
+    String getPath();
+
 
 }
