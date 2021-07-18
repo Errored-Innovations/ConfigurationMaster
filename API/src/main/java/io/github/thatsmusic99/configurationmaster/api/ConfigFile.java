@@ -23,6 +23,7 @@ public class ConfigFile extends CMConfigSection {
     private final File file;
     private boolean isNew = false;
     private CommentWriter writer;
+    private Title title = null;
     protected List<String> pendingComments;
     protected HashMap<String, String> comments;
     protected HashSet<String> examples;
@@ -170,7 +171,7 @@ public class ConfigFile extends CMConfigSection {
         for (String line : writer.getLines()) {
             result.append(line).append("\n");
         }
-        return result.toString();
+        return (title != null ? title + "\n" : "") + result;
     }
 
     public HashMap<String, String> getComments() {
@@ -192,5 +193,13 @@ public class ConfigFile extends CMConfigSection {
 
     public List<String> getLenientSections() {
         return lenientSections;
+    }
+
+    public Title getTitle() {
+        return title;
+    }
+
+    public void setTitle(Title title) {
+        this.title = title;
     }
 }
