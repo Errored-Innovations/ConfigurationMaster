@@ -68,7 +68,7 @@ public class CMMemorySection implements MemorySection {
     public Object get(@NotNull String path, @Nullable Object defaultValue) {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) return defaultValue;
-        String key = path.substring(path.lastIndexOf('.') + 1);
+        String key = getKey(path);
         return section.actualValues.getOrDefault(key, defaultValue);
     }
 
@@ -130,14 +130,14 @@ public class CMMemorySection implements MemorySection {
     public boolean contains(@NotNull String path) {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) return false;
-        String key = path.substring(path.lastIndexOf('.') + 1);
+        String key = getKey(path);
         return section.actualValues.containsKey(key);
     }
 
     protected boolean containsExisting(String path) {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) return false;
-        String key = path.substring(path.lastIndexOf('.') + 1);
+        String key = getKey(path);
         return section.existingValues.containsKey(key);
     }
 
@@ -160,7 +160,7 @@ public class CMMemorySection implements MemorySection {
             if (object == null) return;
             section = getParent().createConfigSection(path);
         }
-        String key = path.substring(path.lastIndexOf('.') + 1);
+        String key = getKey(path);
         if (object == null) {
             section.actualValues.remove(key);
             return;
@@ -206,5 +206,9 @@ public class CMMemorySection implements MemorySection {
 
     protected ConfigFile getParent() {
         return this instanceof ConfigFile ? (ConfigFile) this : parent;
+    }
+
+    protected String getKey(String path) {
+        return path.substring(path.lastIndexOf('.') + 1);
     }
 }

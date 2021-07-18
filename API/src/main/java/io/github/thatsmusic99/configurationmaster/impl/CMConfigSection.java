@@ -30,7 +30,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         String fullPath = getPathWithKey(path);
         CMMemorySection cmSection = getSectionInternal(path);
         if (cmSection == null) cmSection = createSectionInternal(path);
-        String key = path.substring(path.lastIndexOf('.') + 1);
+        String key = getKey(path);
         // Move comments to parent option
         List<String> comments = new ArrayList<>(getParent().getPendingComments());
         String parentSection = path.substring(0, path.indexOf('.') == -1 ? path.length() : path.indexOf('.'));
@@ -115,7 +115,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (!getParent().isNew()) {
             CMMemorySection section = getSectionInternal(path);
             if (section == null) return;
-            String key = path.substring(path.lastIndexOf('.') + 1);
+            String key = getKey(path);
             if (!section.existingValues.containsKey(key)) return;
         }
         forceExample(path, object, comment);
@@ -126,7 +126,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (!getParent().isNew()) {
             CMMemorySection section = (CMMemorySection) getConfigSection(path);
             if (section == null) return;
-            String key = path.substring(path.lastIndexOf('.') + 1);
+            String key = getKey(path);
             if (!section.existingValues.containsKey(key)) return;
         }
         getParent().getExamples().add(getPathWithKey(path));
