@@ -170,6 +170,7 @@ public class CMMemorySection implements MemorySection {
 
     @Nullable
     protected CMMemorySection getSectionInternal(@NotNull String path) {
+        Objects.requireNonNull(path, "Path must not be null!");
         CMMemorySection section = this;
         while (path.indexOf('.') != -1 && section != null) {
             String key = path.substring(0, path.indexOf('.'));

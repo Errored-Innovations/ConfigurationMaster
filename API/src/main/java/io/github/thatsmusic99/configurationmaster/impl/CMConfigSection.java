@@ -26,6 +26,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     public void addDefault(@NotNull String path, @Nullable Object defaultOption, @Nullable String section, @Nullable String comment) {
+        Objects.requireNonNull(path, "The path cannot be null!");
         //
         String fullPath = getPathWithKey(path);
         CMMemorySection cmSection = getSectionInternal(path);
@@ -72,6 +73,10 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void moveTo(@NotNull String oldPath, @NotNull String newPath, @NotNull ConfigFile otherFile) {
+        Objects.requireNonNull(oldPath, "The old path cannot be null!");
+        Objects.requireNonNull(newPath, "The new path cannot be null!");
+        Objects.requireNonNull(otherFile, "The file being transferred to cannot be null!");
+
         if (!contains(oldPath)) return;
         CMMemorySection oldCmSection = getSectionInternal(oldPath);
         if (oldCmSection == null) return;
@@ -86,6 +91,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addComment(@NotNull String path, @NotNull String comment) {
+        Objects.requireNonNull(path, "The path cannot be null!");
+        Objects.requireNonNull(comment, "The comment cannot be null!");
+        // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
         if (getParent().getComments().containsKey(path)) {
             String newComment = getParent().getComments().get(path) + "\n\n" + comment;
             getParent().getComments().put(getPathWithKey(path), newComment);
@@ -96,6 +104,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addComments(@NotNull String path, @NotNull String... comments) {
+        Objects.requireNonNull(path, "The path cannot be null!");
+        Objects.requireNonNull(comments, "The comments array cannot be null!");
+
         if (comments.length == 0) return;
         StringBuilder builder = new StringBuilder();
         builder.append(comments[0]);
@@ -112,6 +123,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addExample(@NotNull String path, Object object, String comment) {
+        Objects.requireNonNull(path, "The path cannot be null!");
+
         if (!getParent().isNew()) {
             CMMemorySection section = getSectionInternal(path);
             if (section == null) return;
@@ -123,6 +136,8 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void createExampleSection(@NotNull String path) {
+        Objects.requireNonNull(path, "The path cannot be null!");
+
         if (!getParent().isNew()) {
             CMMemorySection section = (CMMemorySection) getConfigSection(path);
             if (section == null) return;
@@ -140,12 +155,16 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void forceExample(@NotNull String path, @Nullable Object value, @Nullable String comment) {
+        Objects.requireNonNull(path, "The path cannot be null!");
         getParent().getExamples().add(getPathWithKey(path));
         addDefault(path, value, null, comment);
     }
 
     @Override
     public void makeSectionLenient(@NotNull String path) {
+        // TODO - allow null/empty path to signify making the whole ass file lenient
+        Objects.requireNonNull(path, "The path cannot be null!");
+        // TODO - don't use internals here
         CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
         if (section == null) section = createSectionInternal(path + ".haha");
         section.forceExistingIntoActual();
@@ -174,6 +193,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public CMConfigSection createConfigSection(@NotNull String path) {
+        Objects.requireNonNull(path, "The path must not be null!");
         String[] sections = path.split("\\.");
         CMConfigSection toEdit = this;
         for (int i = 0; i < sections.length; i++) {
