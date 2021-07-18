@@ -27,5 +27,11 @@ public interface ConfigSection extends MemorySection {
 
     void addExample(@NotNull String path, @Nullable Object value, @Nullable String comment);
 
+    void createExampleSection(@NotNull String path);
+
+    void forceExample(@NotNull String path, @Nullable Object value);
+
+    void forceExample(@NotNull String path, @Nullable Object value, @Nullable String comment);
+
     ConfigSection createConfigSection(@NotNull String path);
 }

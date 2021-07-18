@@ -118,11 +118,33 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             String key = path.substring(path.lastIndexOf('.') + 1);
             if (!section.existingValues.containsKey(key)) return;
         }
+        forceExample(path, object, comment);
+    }
+
+    @Override
+    public void createExampleSection(@NotNull String path) {
+        if (!getParent().isNew()) {
+            CMMemorySection section = (CMMemorySection) getConfigSection(path);
+            if (section == null) return;
+            String key = path.substring(path.lastIndexOf('.') + 1);
+            if (!section.existingValues.containsKey(key)) return;
+        }
         getParent().getExamples().add(getPathWithKey(path));
-        addDefault(path, object, null, comment);
+        createConfigSection(path);
     }
 
     public void makeSectionLenient(String path) {
+    @Override
+    public void forceExample(@NotNull String path, @Nullable Object value) {
+        forceExample(path, value, null);
+    }
+
+    @Override
+    public void forceExample(@NotNull String path, @Nullable Object value, @Nullable String comment) {
+        getParent().getExamples().add(getPathWithKey(path));
+        addDefault(path, value, null, comment);
+    }
+
         CMConfigSection section = (CMConfigSection) getSectionInternal(path + ".haha");
         if (section == null) section = createSectionInternal(path + ".haha");
         section.forceExistingIntoActual();
