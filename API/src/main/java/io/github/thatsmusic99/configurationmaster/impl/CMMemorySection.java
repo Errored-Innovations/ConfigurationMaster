@@ -39,10 +39,7 @@ public class CMMemorySection implements MemorySection {
 
     @Override
     public String getString(@NotNull String path, @Nullable String defaultValue) {
-        CMMemorySection section = getSectionInternal(path);
-        if (section == null) return defaultValue;
-        String key = path.substring(path.lastIndexOf('.') + 1);
-        Object result = section.actualValues.getOrDefault(key, defaultValue);
+        Object result = get(path, defaultValue);
         if (result == null) return null;
         return String.valueOf(result);
     }
@@ -125,10 +122,7 @@ public class CMMemorySection implements MemorySection {
 
     @Override
     public ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue) {
-        CMMemorySection section = getSectionInternal(path);
-        if (section == null) return defaultValue;
-        String key = path.substring(path.lastIndexOf('.') + 1);
-        Object value = section.actualValues.getOrDefault(key, defaultValue);
+        Object value = get(path, defaultValue);
         return value instanceof ConfigSection ? (ConfigSection) value : defaultValue;
     }
 
@@ -149,10 +143,7 @@ public class CMMemorySection implements MemorySection {
 
     @Override
     public <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue) {
-        CMMemorySection section = getSectionInternal(path);
-        if (section == null) return defaultValue;
-        String key = path.substring(path.lastIndexOf('.') + 1);
-        Object value = section.actualValues.getOrDefault(key, defaultValue);
+        Object value = get(path, defaultValue);
         if (value == null) return defaultValue;
         if (value.getClass().isArray()) {
             value = Arrays.asList((Object[]) value);
