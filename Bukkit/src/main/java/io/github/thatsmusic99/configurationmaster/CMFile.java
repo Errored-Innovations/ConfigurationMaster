@@ -1,13 +1,15 @@
 package io.github.thatsmusic99.configurationmaster;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * CMFile is the specialised configuration file used by
@@ -33,7 +35,9 @@ import java.util.*;
  * conventions and to make it easier for others to use and understand.
  *
  * @author Holly (Thatsmusic99)
+ * @deprecated Please use the ConfigFile class instead.
  */
+@Deprecated
 public abstract class CMFile {
 
     // The actual configuration file.
@@ -90,6 +94,9 @@ public abstract class CMFile {
      * @param name The name of the config file.
      */
     public CMFile(Plugin plugin, File folder, String name) {
+        plugin.getLogger().severe("This plugin is using the CMFile class in ConfigurationMaster. " +
+                "This class is being removed in the next major release as it has been replaced by the standalone ConfigFile." +
+                "Please urge the developer to update their ConfigurationMaster code as soon as possible.");
         this.plugin = plugin;
         this.folder = folder;
         this.name = name;
@@ -1124,9 +1131,9 @@ public abstract class CMFile {
      *
      * @return The config file as a FileConfiguration object.
      */
-    @Nullable
+    @Deprecated
     public FileConfiguration getConfig() {
-        return config;
+        return YamlConfiguration.loadConfiguration(configFile);
     }
 
     /**

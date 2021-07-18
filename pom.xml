@@ -6,7 +6,8 @@
 
     <groupId>com.github.thatsmusic99</groupId>
     <artifactId>ConfigurationMaster</artifactId>
-    <version>v1.0.2</version>
+    <packaging>pom</packaging>
+    <version>v2.0.0-ALPHA-4</version>
 
     <build>
         <plugins>
@@ -22,6 +23,10 @@
             </plugin>
         </plugins>
     </build>
+    <modules>
+        <module>API</module>
+        <module>Bukkit</module>
+    </modules>
 
     <repositories>
         <repository>
@@ -31,19 +36,18 @@
     </repositories>
 
     <dependencies>
-        <!-- Spigot Dependency -->
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>13.0</version>
+            <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
