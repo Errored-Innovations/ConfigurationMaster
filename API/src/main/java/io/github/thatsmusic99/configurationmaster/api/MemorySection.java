@@ -8,24 +8,84 @@ import java.util.List;
 
 public interface MemorySection {
 
+    /**
+     * Returns a string at a specified path.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @return The string stored at the path. If nothing is found, a value of null is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
+    @Nullable
     default String getString(@NotNull String path) {
         return getString(path, null);
     }
 
+    /**
+     * Returns a string at a specified path. If it is not found, the default value is returned.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @param defaultValue The default value to be returned if nothing is found.
+     * @return The string stored at the path. If nothing is found, the default value is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     String getString(@NotNull String path, @Nullable String defaultValue);
 
+    /**
+     * Returns an integer at a specified path.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @return The integer stored at the path. If nothing is found, a value of 0 is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     default int getInteger(@NotNull String path) {
         return getInteger(path, 0);
     }
 
+    /**
+     * Returns an integer at a specified path. If it is not found, the default value is returned.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @param defaultValue The default value to be returned if nothing is found.
+     * @return The integer stored at the path. If nothing is found, the default value is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     int getInteger(@NotNull String path, int defaultValue);
 
+    /**
+     * Returns a double at a specified path.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @return The double stored at the path. If nothing is found, a value of 0.0 is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     default double getDouble(@NotNull String path) {
         return getDouble(path, 0.0);
     }
 
+    /**
+     * Returns a double at a specified path. If it is not found, the default value is returned.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @param defaultValue The default value to be returned if nothing is found.
+     * @return The double stored at the path. If nothing is found, the default value is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     double getDouble(@NotNull String path, double defaultValue);
 
+    /**
+     * Returns an object at a specified path.
+     *
+     * @param path The path of the option itself.
+     *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
+     * @return The object stored at the path. If nothing is found, a null value is returned.
+     * @throws NullPointerException if the path is null (not if it wasn't found).
+     */
     default Object get(@NotNull String path) {
         return get(path, null);
     }

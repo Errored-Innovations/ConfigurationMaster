@@ -14,6 +14,29 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
+/**
+ * Represents a specialised YAML file in ConfigurationMaster.<br><br>
+ *
+ * It can be initialised using the following methods:<br>
+ *
+ * <ol>
+ *     <li>{@link ConfigFile#loadConfig(File)} - this loads a file with safety precautions.
+ *     If the file contains a syntax error, the API will print an error,
+ *     rename the file temporarily and load a new empty file.
+ *
+ *     It is recommended to use this if you want your users to
+ *     not lose their progress on a config file if they make a
+ *     single mistake.
+ *     </li>
+ *
+ *     <li>{@link io.github.thatsmusic99.configurationmaster.api.ConfigFile#ConfigFile(File)}
+ *     - this loads a file without the safety precautions taken above.
+ *     This is recommended if you want to handle YAMLExceptions.</li>
+ *
+ *     <li>Simply extend the class. This will not take any safety precautions, similarly to using the constructor.</li>
+ * </ol>
+ *
+ */
 public class ConfigFile extends CMConfigSection {
 
     private final Yaml yaml;
