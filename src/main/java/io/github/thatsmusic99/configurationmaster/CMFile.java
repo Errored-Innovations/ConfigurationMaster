@@ -1,5 +1,6 @@
 package io.github.thatsmusic99.configurationmaster;
 
+import com.google.common.base.Charsets;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -1243,7 +1244,7 @@ public abstract class CMFile {
         try {
             if (isConfigSaving) {
                 tempConfig.save(configFile);
-                BufferedReader reader = new BufferedReader(new FileReader(configFile));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(configFile), Charsets.UTF_8));
                 String currentLine;
                 while ((currentLine = reader.readLine()) != null) {
                     if (currentLine.startsWith("#")) continue;
@@ -1252,7 +1253,7 @@ public abstract class CMFile {
                 reader.close();
             } else {
                 // Opens up a new file writer
-                FileWriter writer = new FileWriter(configFile);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(configFile), Charsets.UTF_8));
                 // For each line to write...
                 for (String line : currentLines) {
                     // Write that and add in a break.
