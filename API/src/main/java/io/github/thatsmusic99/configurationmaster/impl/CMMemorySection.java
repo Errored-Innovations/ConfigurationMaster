@@ -135,7 +135,7 @@ public class CMMemorySection implements MemorySection {
     }
 
     protected boolean containsExisting(String path) {
-        CMMemorySection section = getSectionInternal(path);
+        CMMemorySection section = getSectionInternal(path, false);
         if (section == null) return false;
         String key = getKey(path);
         return section.existingValues.containsKey(key);
@@ -170,6 +170,10 @@ public class CMMemorySection implements MemorySection {
 
     @Nullable
     protected CMMemorySection getSectionInternal(@NotNull String path) {
+        return getSectionInternal(path, true);
+    }
+
+    protected CMMemorySection getSectionInternal(@NotNull String path, boolean add) {
         Objects.requireNonNull(path, "Path must not be null!");
         CMMemorySection section = this;
         while (path.indexOf('.') != -1 && section != null) {
@@ -181,7 +185,7 @@ public class CMMemorySection implements MemorySection {
             } else {
                 tempSection = (CMMemorySection) section.getConfigSection(key);
             }
-            if (tempSection != null) section.actualValues.putIfAbsent(key, tempSection);
+            if (tempSection != null && add) section.actualValues.putIfAbsent(key, tempSection);
             section = tempSection;
         }
         return section;

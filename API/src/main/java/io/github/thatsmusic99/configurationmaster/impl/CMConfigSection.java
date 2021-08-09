@@ -78,7 +78,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Objects.requireNonNull(otherFile, "The file being transferred to cannot be null!");
 
         if (!containsExisting(oldPath)) return;
-        CMMemorySection oldCmSection = getSectionInternal(oldPath);
+        CMMemorySection oldCmSection = getSectionInternal(oldPath, false);
         if (oldCmSection == null) return;
         CMMemorySection newCmSection = otherFile.getSectionInternal(newPath);
         if (newCmSection == null) newCmSection = otherFile.createSectionInternal(newPath);
