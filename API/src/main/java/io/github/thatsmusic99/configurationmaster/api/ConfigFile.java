@@ -128,6 +128,11 @@ public class ConfigFile extends CMConfigSection {
         }
         if (content.length() == 0) isNew = true;
         loadFromString(content.toString());
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadFromString(String str) {
