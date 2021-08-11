@@ -127,9 +127,15 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
         if (!getParent().isNew()) {
             CMMemorySection section = getSectionInternal(path);
-            if (section == null) return;
+            if (section == null) {
+                getParent().getExamples().add(getPathWithKey(path));
+                return;
+            }
             String key = getKey(path);
-            if (!section.existingValues.containsKey(key)) return;
+            if (!section.existingValues.containsKey(key)) {
+                getParent().getExamples().add(getPathWithKey(path));
+                return;
+            }
         }
         forceExample(path, object, comment);
     }
@@ -138,13 +144,13 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void createExampleSection(@NotNull String path) {
         Objects.requireNonNull(path, "The path cannot be null!");
 
+        getParent().getExamples().add(getPathWithKey(path));
         if (!getParent().isNew()) {
             CMMemorySection section = (CMMemorySection) getConfigSection(path);
             if (section == null) return;
             String key = getKey(path);
             if (!section.existingValues.containsKey(key)) return;
         }
-        getParent().getExamples().add(getPathWithKey(path));
         createConfigSection(path);
     }
 
@@ -173,6 +179,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     private void forceExistingIntoActual() {
+        if (!getParent().isNew()) {
+            actualValues.clear();
+        }
         for (String key : existingValues.keySet()) {
             if (existingValues.get(key) instanceof CMConfigSection) {
                 ((CMConfigSection) existingValues.get(key)).forceExistingIntoActual();
