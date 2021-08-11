@@ -111,6 +111,7 @@ public class ConfigFile extends CMConfigSection {
             try {
                 file.createNewFile();
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+                isNew = true;
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -150,6 +151,7 @@ public class ConfigFile extends CMConfigSection {
     public void save() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
             writer.write(saveToString());
+            isNew = false;
         }
     }
 
@@ -166,7 +168,7 @@ public class ConfigFile extends CMConfigSection {
         loadWithExceptions();
 
         for (String path : allDefaults.keySet()) {
-            if (!examples.contains(path) || containsExisting(path)) {
+            if (!examples.contains(path) || containsExisting(path) || isNew) {
                 addDefault(path, allDefaults.get(path));
             }
         }
