@@ -191,7 +191,7 @@ public class ConfigFile extends CMConfigSection {
         return isNew;
     }
 
-    private String saveToString() {
+    public String saveToString() {
         String dump = this.yaml.dump(convertToMap());
         if (dump.equals("{}")) {
             dump = "";
