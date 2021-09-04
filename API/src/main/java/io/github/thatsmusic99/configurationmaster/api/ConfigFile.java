@@ -232,4 +232,8 @@ public class ConfigFile extends CMConfigSection {
     public void setTitle(Title title) {
         this.title = title;
     }
+
+    public File getFile() {
+        return file;
+    }
 }
