@@ -236,6 +236,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     protected void mapToCM(Map<?, ?> map) {
         for (Object keyObj : map.keySet()) {
+            if (keyObj == null) keyObj = "null";
             String key = keyObj.toString();
             Object value = map.get(keyObj);
             if (value instanceof Map) {
