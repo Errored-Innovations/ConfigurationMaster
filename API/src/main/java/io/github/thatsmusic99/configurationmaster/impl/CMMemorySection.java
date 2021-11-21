@@ -128,18 +128,11 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public boolean contains(@NotNull String path) {
+    public boolean contains(@NotNull String path, boolean useExisting) {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) return false;
         String key = getKey(path);
-        return section.actualValues.containsKey(key);
-    }
-
-    protected boolean containsExisting(String path) {
-        CMMemorySection section = getSectionInternal(path, false);
-        if (section == null) return false;
-        String key = getKey(path);
-        return section.existingValues.containsKey(key);
+        return useExisting ? section.existingValues.containsKey(key) : section.actualValues.containsKey(key);
     }
 
     @Override

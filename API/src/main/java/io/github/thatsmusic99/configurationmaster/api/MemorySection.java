@@ -325,7 +325,11 @@ public interface MemorySection {
      *      To indicate for an option to be placed inside different sections, use a . delimiter, e.g. section.option
      * @return true if the memory section contains the path, false if not.
      */
-    boolean contains(@NotNull String path);
+    default boolean contains(@NotNull String path) {
+        return contains(path, false);
+    }
+
+    boolean contains(@NotNull String path, boolean useExisting);
 
     /**
      * Returns a list at a given path. If the provided path does not point to a list but a different data type,
