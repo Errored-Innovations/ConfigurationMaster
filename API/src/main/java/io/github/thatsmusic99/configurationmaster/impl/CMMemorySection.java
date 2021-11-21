@@ -158,7 +158,7 @@ public class CMMemorySection implements MemorySection {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) {
             if (object == null) return;
-            section = getParent().createConfigSection(path);
+            section = getParent().createSectionInternal(path);
         }
         String key = getKey(path);
         if (object == null) {
