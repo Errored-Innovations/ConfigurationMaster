@@ -21,7 +21,7 @@ public interface MemorySection {
      */
     @Nullable
     default String getString(@NotNull String path) {
-        return getString(path, null);
+        return getString(path, null, false);
     }
 
     /**
@@ -33,7 +33,15 @@ public interface MemorySection {
      * @return The string stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    String getString(@NotNull String path, @Nullable String defaultValue);
+    default String getString(@NotNull String path, @Nullable String defaultValue) {
+        return getString(path, defaultValue, false);
+    }
+
+    default String getString(@NotNull String path, boolean useExisting) {
+        return getString(path, null, useExisting);
+    }
+
+    String getString(@NotNull String path, @Nullable String defaultValue, boolean useExisting);
 
     /**
      * Returns an integer at a specified path.
@@ -44,7 +52,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default int getInteger(@NotNull String path) {
-        return getInteger(path, 0);
+        return getInteger(path, 0, false);
     }
 
     /**
@@ -56,7 +64,15 @@ public interface MemorySection {
      * @return The integer stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    int getInteger(@NotNull String path, int defaultValue);
+    default int getInteger(@NotNull String path, int defaultValue) {
+        return getInteger(path, defaultValue, false);
+    }
+
+    default int getInteger(@NotNull String path, boolean useExisting) {
+        return getInteger(path, 0, useExisting);
+    }
+
+    int getInteger(@NotNull String path, int defaultValue, boolean useExisting);
 
     /**
      * Returns a double at a specified path.
@@ -67,7 +83,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default double getDouble(@NotNull String path) {
-        return getDouble(path, 0.0);
+        return getDouble(path, 0.0, false);
     }
 
     /**
@@ -79,7 +95,15 @@ public interface MemorySection {
      * @return The double stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    double getDouble(@NotNull String path, double defaultValue);
+    default double getDouble(@NotNull String path, double defaultValue) {
+        return getDouble(path, defaultValue, false);
+    }
+
+    default double getDouble(@NotNull String path, boolean useExisting) {
+        return getDouble(path, 0, useExisting);
+    }
+
+    double getDouble(@NotNull String path, double defaultValue, boolean useExisting);
 
     /**
      * Returns an object at a specified path.
@@ -90,7 +114,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default Object get(@NotNull String path) {
-        return get(path, null);
+        return get(path, null, false);
     }
 
     /**
@@ -102,7 +126,15 @@ public interface MemorySection {
      * @return The object stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    Object get(@NotNull String path, @Nullable Object defaultValue);
+    default Object get(@NotNull String path, @Nullable Object defaultValue) {
+        return get(path, defaultValue, false);
+    }
+
+    default Object get(@NotNull String path, boolean useExisting) {
+        return get(path, null, useExisting);
+    }
+
+    Object get(@NotNull String path, @Nullable Object defaultValue, boolean useExisting);
 
     /**
      * Returns a boolean at a specified path.
@@ -125,7 +157,11 @@ public interface MemorySection {
      * @return The boolean stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    boolean getBoolean(@NotNull String path, boolean defaultValue);
+    default boolean getBoolean(@NotNull String path, boolean defaultValue) {
+        return getBoolean(path, defaultValue, false);
+    }
+
+    boolean getBoolean(@NotNull String path, boolean defaultValue, boolean useExisting);
 
     /**
      * Returns a long at a specified path.
@@ -136,7 +172,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default long getLong(@NotNull String path) {
-        return getLong(path, 0);
+        return getLong(path, 0, false);
     }
 
     /**
@@ -148,7 +184,15 @@ public interface MemorySection {
      * @return The long stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    long getLong(@NotNull String path, long defaultValue);
+    default long getLong(@NotNull String path, long defaultValue) {
+        return getLong(path, defaultValue, false);
+    }
+
+    default long getLong(@NotNull String path, boolean useExisting) {
+        return getLong(path, 0, useExisting);
+    }
+
+    long getLong(@NotNull String path, long defaultValue, boolean useExisting);
 
     /**
      * Returns a short at a specified path.
@@ -159,7 +203,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default short getShort(@NotNull String path) {
-        return getShort(path, (short) 0);
+        return getShort(path, (short) 0, false);
     }
 
     /**
@@ -171,7 +215,15 @@ public interface MemorySection {
      * @return The short stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    short getShort(@NotNull String path, short defaultValue);
+    default short getShort(@NotNull String path, short defaultValue) {
+        return getShort(path, defaultValue, false);
+    }
+
+    default short getShort(@NotNull String path, boolean useExisting) {
+        return getShort(path, (short) 0, useExisting);
+    }
+
+    short getShort(@NotNull String path, short defaultValue, boolean useExisting);
 
     /**
      * Returns a byte at a specified path.
@@ -182,7 +234,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default byte getByte(@NotNull String path) {
-        return getByte(path, (byte) 0);
+        return getByte(path, (byte) 0, false);
     }
 
     /**
@@ -194,7 +246,15 @@ public interface MemorySection {
      * @return The byte stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    byte getByte(@NotNull String path, byte defaultValue);
+    default byte getByte(@NotNull String path, byte defaultValue) {
+        return getByte(path, defaultValue, false);
+    }
+
+    default byte getByte(@NotNull String path, boolean useExisting) {
+        return getByte(path, (byte) 0, useExisting);
+    }
+
+    byte getByte(@NotNull String path, byte defaultValue, boolean useExisting);
 
     /**
      * Returns a float at a specified path.
@@ -205,7 +265,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default float getFloat(@NotNull String path) {
-        return getFloat(path, 0f);
+        return getFloat(path, 0f, false);
     }
 
     /**
@@ -217,7 +277,15 @@ public interface MemorySection {
      * @return The float stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    float getFloat(@NotNull String path, float defaultValue);
+    default float getFloat(@NotNull String path, float defaultValue) {
+        return getFloat(path, defaultValue, false);
+    }
+
+    default float getFloat(@NotNull String path, boolean useExisting) {
+        return getFloat(path, 0.0f, useExisting);
+    }
+
+    float getFloat(@NotNull String path, float defaultValue, boolean useExisting);
 
     /**
      * Returns a configuration file at a specified path.
@@ -228,7 +296,7 @@ public interface MemorySection {
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
     default ConfigSection getConfigSection(@NotNull String path) {
-        return getConfigSection(path, null);
+        return getConfigSection(path, null, false);
     }
 
     /**
@@ -240,7 +308,15 @@ public interface MemorySection {
      * @return The configuration section stored at the path. If nothing is found, the default value is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue);
+    default ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue) {
+        return getConfigSection(path, defaultValue, false);
+    }
+
+    default ConfigSection getConfigSection(@NotNull String path, boolean useExisting) {
+        return getConfigSection(path, null, useExisting);
+    }
+
+    ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue, boolean useExisting);
 
     /**
      * Returns whether or not the memory section contains a specific path.
@@ -277,7 +353,7 @@ public interface MemorySection {
      */
     @NotNull
     default List<String> getStringList(@NotNull String path) {
-        return getList(path, new ArrayList<>());
+        return getList(path, new ArrayList<>(), false);
     }
 
     /**
@@ -291,7 +367,15 @@ public interface MemorySection {
      * @return The list stored at the path.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue);
+    default <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue) {
+        return getList(path, defaultValue, false);
+    }
+
+    default <T> List<T> getList(@NotNull String path, boolean useExisting) {
+        return getList(path, new ArrayList<>(), useExisting);
+    }
+
+    <T> List<T>  getList(@NotNull String path, @Nullable List<T> defaultValue, boolean useExisting);
 
     /**
      * Sets a value at a specified path.
