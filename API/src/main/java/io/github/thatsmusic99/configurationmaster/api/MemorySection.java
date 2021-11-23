@@ -397,7 +397,11 @@ public interface MemorySection {
      *      keys from this memory section only.
      * @return A list of keys to the given paths.
      */
-    List<String> getKeys(boolean deep);
+    default List<String> getKeys(boolean deep) {
+        return getKeys(deep, false);
+    }
+
+    List<String> getKeys(boolean deep, boolean useExisting);
 
     /**
      * The path of this section.

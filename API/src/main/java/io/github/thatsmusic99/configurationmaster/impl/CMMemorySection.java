@@ -186,11 +186,12 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public List<String> getKeys(boolean deep) {
+    public List<String> getKeys(boolean deep, boolean useExisting) {
         List<String> keys = new ArrayList<>();
-        for (String path : actualValues.keySet()) {
-            if (deep && actualValues.get(path) instanceof CMConfigSection) {
-                keys.addAll(((CMConfigSection) actualValues.get(path)).getKeys(true));
+        HashMap<String, Object> map = useExisting ? existingValues : actualValues;
+        for (String path : map.keySet()) {
+            if (deep && map.get(path) instanceof CMConfigSection) {
+                keys.addAll(((CMConfigSection) map.get(path)).getKeys(true));
             } else {
                 keys.add(path);
             }
