@@ -66,7 +66,7 @@ public class CMMemorySection implements MemorySection {
 
     @Override
     public Object get(@NotNull String path, @Nullable Object defaultValue, boolean useExisting) {
-        CMMemorySection section = getSectionInternal(path);
+        CMMemorySection section = getSectionInternal(path, !useExisting);
         if (section == null) return defaultValue;
         String key = getKey(path);
         return useExisting ? section.existingValues.getOrDefault(key, defaultValue)
