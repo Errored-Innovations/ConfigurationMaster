@@ -59,7 +59,7 @@ public class ConfigFile extends CMConfigSection {
      * @see ConfigFile#loadConfig(File)
      * @throws YAMLException if the file being loaded contains syntax errors.
      */
-    public ConfigFile(@NotNull File file) {
+    public ConfigFile(@NotNull File file) throws IOException {
         yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions, loaderOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -81,7 +81,7 @@ public class ConfigFile extends CMConfigSection {
      * @param file The file to be loaded.
      * @return the ConfigFile instance of the file or backup file.
      */
-    public static ConfigFile loadConfig(File file) {
+    public static ConfigFile loadConfig(File file) throws IOException {
         try {
             return new ConfigFile(file);
         } catch (YAMLException e) {
@@ -103,36 +103,31 @@ public class ConfigFile extends CMConfigSection {
         }
     }
 
-    private void loadWithExceptions() {
-        BufferedReader reader;
+    private void loadWithExceptions() throws IOException {
+        BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-        } catch (FileNotFoundException ex) {
             try {
+                debug("Loading the content of the file " + file.getName() + "...");
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+            } catch (FileNotFoundException ex) {
+                debug("Failed to find the file, creating a new one...");
                 file.createNewFile();
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
                 isNew = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
             }
-        }
 
-        StringBuilder content = new StringBuilder();
-        try {
+            StringBuilder content = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 content.append(line).append("\n");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (content.length() == 0) isNew = true;
-        loadFromString(content.toString());
-        try {
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (content.length() == 0) {
+                debug(file.getName() + " is brand new.");
+                isNew = true;
+            }
+            loadFromString(content.toString());
+        } finally {
+            if (reader != null) reader.close();
         }
     }
 
