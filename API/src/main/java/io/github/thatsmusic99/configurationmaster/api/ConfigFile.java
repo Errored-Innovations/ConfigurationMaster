@@ -107,10 +107,8 @@ public class ConfigFile extends CMConfigSection {
         BufferedReader reader = null;
         try {
             try {
-                debug("Loading the content of the file " + file.getName() + "...");
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             } catch (FileNotFoundException ex) {
-                debug("Failed to find the file, creating a new one...");
                 file.createNewFile();
                 reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
                 isNew = true;
@@ -122,7 +120,6 @@ public class ConfigFile extends CMConfigSection {
                 content.append(line).append("\n");
             }
             if (content.length() == 0) {
-                debug(file.getName() + " is brand new.");
                 isNew = true;
             }
             loadFromString(content.toString());
