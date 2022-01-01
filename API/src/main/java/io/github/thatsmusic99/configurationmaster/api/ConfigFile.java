@@ -13,6 +13,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Represents a specialised YAML file in ConfigurationMaster.<br><br>
@@ -51,6 +52,8 @@ public class ConfigFile extends CMConfigSection {
     protected HashMap<String, String> comments;
     protected HashSet<String> examples;
     protected List<String> lenientSections;
+    protected boolean verbose;
+    protected static Logger logger = new CMLogger();
 
     /**
      * Used to load a config file without safety precautions taken by the API.
@@ -71,6 +74,20 @@ public class ConfigFile extends CMConfigSection {
         examples = new HashSet<>();
         lenientSections = new ArrayList<>();
         loadWithExceptions();
+    }
+
+    /**
+     * Enables the debugging mode to track what is happening within the API.
+     *
+     * @return The ConfigFile object with debugging being enabled.
+     */
+    public ConfigFile enableDebugging() {
+        this.verbose = true;
+        return this;
+    }
+
+    public void debug(String message) {
+        if (verbose) logger.info(message);
     }
 
     /**
@@ -97,7 +114,7 @@ public class ConfigFile extends CMConfigSection {
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-            System.out.println("YAMLException caught - there is a syntax error in the config.");
+            logger.severe("YAMLException caught - there is a syntax error in the config.");
             e.printStackTrace();
             return new ConfigFile(tempFile);
         }
@@ -227,5 +244,13 @@ public class ConfigFile extends CMConfigSection {
 
     public File getFile() {
         return file;
+    }
+
+    private static class CMLogger extends Logger {
+
+        // if you can't be 'em, join 'em
+        protected CMLogger() {
+            super("ConfigurationMaster", null);
+        }
     }
 }
