@@ -162,7 +162,7 @@ public class ConfigFile extends CMConfigSection {
             String saved = saveToString();
             writer.write(saved);
             isNew = false;
-            loadFromString(saved);
+            this.existingValues.clear();
         }
     }
 
