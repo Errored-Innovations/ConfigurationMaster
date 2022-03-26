@@ -38,15 +38,15 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public String getString(@NotNull String path, @Nullable String defaultValue, boolean useExisting) {
-        Object result = get(path, defaultValue, useExisting);
+    public String getString(@NotNull String path, @Nullable String defaultValue) {
+        Object result = get(path, defaultValue);
         if (result == null) return null;
         return String.valueOf(result);
     }
 
     @Override
-    public int getInteger(@NotNull String path, int defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public int getInteger(@NotNull String path, int defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Integer.parseInt(result);
         } catch (NumberFormatException ex) {
@@ -55,8 +55,8 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public double getDouble(@NotNull String path, double defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public double getDouble(@NotNull String path, double defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Double.parseDouble(result);
         } catch (NumberFormatException ex) {
@@ -65,25 +65,24 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public Object get(@NotNull String path, @Nullable Object defaultValue, boolean useExisting) {
-        CMMemorySection section = getSectionInternal(path, !useExisting);
+    public Object get(@NotNull String path, @Nullable Object defaultValue) {
+        CMMemorySection section = getSectionInternal(path, false);
         if (section == null) return defaultValue;
         String key = getKey(path);
-        return useExisting ? section.existingValues.getOrDefault(key, defaultValue)
-                : section.actualValues.getOrDefault(key, defaultValue);
+        return section.actualValues.getOrDefault(key, section.existingValues.getOrDefault(key, defaultValue));
     }
 
     @Override
-    public boolean getBoolean(@NotNull String path, boolean defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public boolean getBoolean(@NotNull String path, boolean defaultValue) {
+        String result = getString(path);
         if (result == null) return defaultValue;
         if (!(result.equalsIgnoreCase("false") || result.equalsIgnoreCase("true"))) return defaultValue;
         return result.equalsIgnoreCase("true");
     }
 
     @Override
-    public long getLong(@NotNull String path, long defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public long getLong(@NotNull String path, long defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Long.parseLong(result);
         } catch (NumberFormatException ex) {
@@ -92,8 +91,8 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public short getShort(@NotNull String path, short defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public short getShort(@NotNull String path, short defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Short.parseShort(result);
         } catch (NumberFormatException ex) {
@@ -102,8 +101,8 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public byte getByte(@NotNull String path, byte defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public byte getByte(@NotNull String path, byte defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Byte.parseByte(result);
         } catch (NumberFormatException ex) {
@@ -112,8 +111,8 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public float getFloat(@NotNull String path, float defaultValue, boolean useExisting) {
-        String result = getString(path, useExisting);
+    public float getFloat(@NotNull String path, float defaultValue) {
+        String result = getString(path);
         try {
             return result == null ? defaultValue : Float.parseFloat(result);
         } catch (NumberFormatException ex) {
@@ -122,22 +121,22 @@ public class CMMemorySection implements MemorySection {
     }
 
     @Override
-    public ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue, boolean useExisting) {
-        Object value = get(path, defaultValue, useExisting);
+    public ConfigSection getConfigSection(@NotNull String path, @Nullable ConfigSection defaultValue) {
+        Object value = get(path, defaultValue);
         return value instanceof ConfigSection ? (ConfigSection) value : defaultValue;
     }
 
     @Override
-    public boolean contains(@NotNull String path, boolean useExisting) {
+    public boolean contains(@NotNull String path) {
         CMMemorySection section = getSectionInternal(path);
         if (section == null) return false;
         String key = getKey(path);
-        return useExisting ? section.existingValues.containsKey(key) : section.actualValues.containsKey(key);
+        return section.existingValues.containsKey(key) || section.actualValues.containsKey(key);
     }
 
     @Override
-    public <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue, boolean useExisting) {
-        Object value = get(path, defaultValue, useExisting);
+    public <T> List<T> getList(@NotNull String path, @Nullable List<T> defaultValue) {
+        Object value = get(path, defaultValue);
         if (value == null) return defaultValue;
         if (value.getClass().isArray()) {
             value = Arrays.asList((Object[]) value);

@@ -159,8 +159,10 @@ public class ConfigFile extends CMConfigSection {
      */
     public void save() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
-            writer.write(saveToString());
+            String saved = saveToString();
+            writer.write(saved);
             isNew = false;
+            loadFromString(saved);
         }
     }
 
@@ -177,7 +179,7 @@ public class ConfigFile extends CMConfigSection {
         loadWithExceptions();
 
         for (String path : allDefaults.keySet()) {
-            if (!examples.contains(path) || contains(path, true) || isNew) {
+            if (!examples.contains(path) || contains(path) || isNew) {
                 addDefault(path, allDefaults.get(path));
             }
         }
