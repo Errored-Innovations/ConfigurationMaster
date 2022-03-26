@@ -43,7 +43,7 @@ public class ConfigFile extends CMConfigSection {
     private final Yaml yaml;
     private final DumperOptions yamlOptions = new DumperOptions();
     private final LoaderOptions loaderOptions = new LoaderOptions();
-    private final Representer yamlRepresenter = new Representer();
+    private final Representer yamlRepresenter = new Representer(new DumperOptions());
     private final File file;
     private boolean isNew = false;
     private final CommentWriter writer;
@@ -63,7 +63,7 @@ public class ConfigFile extends CMConfigSection {
      * @throws YAMLException if the file being loaded contains syntax errors.
      */
     public ConfigFile(@NotNull File file) throws IOException {
-        yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions, loaderOptions);
+        yaml = new Yaml(new SafeConstructor(new LoaderOptions()), yamlRepresenter, yamlOptions, loaderOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -162,7 +162,7 @@ public class ConfigFile extends CMConfigSection {
             String saved = saveToString();
             writer.write(saved);
             isNew = false;
-            loadFromString(saved);
+            this.existingValues.clear();
         }
     }
 
