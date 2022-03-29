@@ -63,7 +63,7 @@ public class ConfigFile extends CMConfigSection {
      * @throws YAMLException if the file being loaded contains syntax errors.
      */
     public ConfigFile(@NotNull File file) throws IOException {
-        yaml = new Yaml(new SafeConstructor(new LoaderOptions()), yamlRepresenter, yamlOptions, loaderOptions);
+        yaml = new Yaml(new SafeConstructor(new LoaderOptions()), yamlRepresenter, yamlOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
