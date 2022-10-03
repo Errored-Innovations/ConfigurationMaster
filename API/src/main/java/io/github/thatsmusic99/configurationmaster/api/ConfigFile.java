@@ -42,6 +42,7 @@ public class ConfigFile extends CMConfigSection {
 
     private final Yaml yaml;
     private final DumperOptions yamlOptions = new DumperOptions();
+    private final LoaderOptions yamlLoaderOptions = new LoaderOptions();
     private final Representer yamlRepresenter = new Representer();
     private final File file;
     private boolean isNew = false;
@@ -62,10 +63,11 @@ public class ConfigFile extends CMConfigSection {
      * @throws YAMLException if the file being loaded contains syntax errors.
      */
     public ConfigFile(@NotNull File file) throws IOException {
-        yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions);
+        yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions, yamlLoaderOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		yamlLoaderOptions.setCodePointLimit(64 * 1024 * 1024); // 64 MB
         this.file = file;
         writer = new CommentWriter(this);
         pendingComments = new ArrayList<>();
