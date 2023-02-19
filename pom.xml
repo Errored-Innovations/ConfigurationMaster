@@ -7,7 +7,7 @@
     <groupId>com.github.thatsmusic99</groupId>
     <artifactId>ConfigurationMaster</artifactId>
     <packaging>pom</packaging>
-    <version>v2.0.0-BETA-3</version>
+    <version>v2.0.0-BETA-4</version>
 
     <build>
         <plugins>
