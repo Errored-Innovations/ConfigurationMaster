@@ -14,7 +14,7 @@ import java.util.List;
 public class CommandWhitelistTest {
 
     @Test
-    public void doCommandWhitelistTests() throws IOException {
+    public void doCommandWhitelistTests() throws Exception {
         ConfigFile config = ConfigFile.loadConfig(new File("command-whitelist.yml"));
 
         config.addDefault("messages.prefix", "CommandWhitelist > ");
