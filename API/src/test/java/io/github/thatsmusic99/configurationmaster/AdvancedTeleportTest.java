@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class AdvancedTeleportTest {
 
     @Test
-    public void initATConfig() throws IOException {
+    public void initATConfig() throws Exception {
         File file = new File("test-config.yml");
         if (!file.exists()) {
             file.createNewFile();
