@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class CMMemorySection implements MemorySection {
+public class CMMemorySection extends LinkedHashMap<String, Object> implements MemorySection {
 
     protected LinkedHashMap<String, Object> defaults;
     protected LinkedHashMap<String, Object> existingValues;
@@ -34,7 +34,6 @@ public class CMMemorySection implements MemorySection {
     private void init() {
         this.defaults = new LinkedHashMap<>();
         this.existingValues = new LinkedHashMap<>();
-        this.actualValues = new LinkedHashMap<>();
     }
 
     @Override
@@ -69,7 +68,7 @@ public class CMMemorySection implements MemorySection {
         CMMemorySection section = getSectionInternal(path, false);
         if (section == null) return defaultValue;
         String key = getKey(path);
-        return section.actualValues.getOrDefault(key, section.existingValues.getOrDefault(key, defaultValue));
+        return section.getOrDefault(key, section.existingValues.getOrDefault(key, defaultValue));
     }
 
     @Override
@@ -131,7 +130,7 @@ public class CMMemorySection implements MemorySection {
         CMMemorySection section = getSectionInternal(path, false);
         if (section == null) return false;
         String key = getKey(path);
-        return section.existingValues.containsKey(key) || section.actualValues.containsKey(key);
+        return section.existingValues.containsKey(key) || section.containsKey(key);
     }
 
     @Override
@@ -155,10 +154,10 @@ public class CMMemorySection implements MemorySection {
         }
         String key = getKey(path);
         if (object == null) {
-            section.actualValues.remove(key);
+            section.remove(key);
             return;
         }
-        section.actualValues.put(key, object);
+        section.put(key, object);
     }
 
     @Nullable
@@ -178,7 +177,7 @@ public class CMMemorySection implements MemorySection {
             } else {
                 tempSection = (CMMemorySection) section.getConfigSection(key);
             }
-            if (tempSection != null && add) section.actualValues.putIfAbsent(key, tempSection);
+            if (tempSection != null && add) section.putIfAbsent(key, tempSection);
             section = tempSection;
         }
         return section;
@@ -187,7 +186,7 @@ public class CMMemorySection implements MemorySection {
     @Override
     public List<String> getKeys(boolean deep, boolean useExisting) {
         List<String> keys = new ArrayList<>();
-        HashMap<String, Object> map = useExisting ? existingValues : actualValues;
+        HashMap<String, Object> map = useExisting ? existingValues : this;
         for (String path : map.keySet()) {
             if (deep && map.get(path) instanceof CMConfigSection) {
                 keys.addAll(((CMConfigSection) map.get(path)).getKeys(true));

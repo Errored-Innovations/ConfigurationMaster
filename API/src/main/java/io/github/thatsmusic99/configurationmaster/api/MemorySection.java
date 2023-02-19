@@ -5,11 +5,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A MemorySection represents a section in the configuration that holds data.
  */
-public interface MemorySection {
+public interface MemorySection extends Map<String, Object> {
 
     /**
      * Returns a string at a specified path.
@@ -19,8 +20,7 @@ public interface MemorySection {
      * @return The string stored at the path. If nothing is found, a value of null is returned.
      * @throws NullPointerException if the path is null (not if it wasn't found).
      */
-    @Nullable
-    default String getString(@NotNull String path) {
+    default @Nullable String getString(@NotNull String path) {
         return getString(path, null);
     }
 
