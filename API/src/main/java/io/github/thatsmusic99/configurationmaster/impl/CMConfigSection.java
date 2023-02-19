@@ -28,12 +28,18 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     public void addDefault(@NotNull String path, @Nullable Object defaultOption, @Nullable String section, @Nullable String comment) {
+
+        // Null checks
         Objects.requireNonNull(path, "The path cannot be null!");
-        //
+
+        // Get the full path of the key in question
         String fullPath = getPathWithKey(path);
+
+        // Get the section to be created - if it's null, create it
         CMMemorySection cmSection = getSectionInternal(path);
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = getKey(path);
+
         // Move comments to parent option
         List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
 
@@ -57,7 +63,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
         // Add the defaults
         cmSection.defaults.put(key, defaultOption);
-        cmSection.actualValues.put(key, cmSection.existingValues.getOrDefault(key, defaultOption));
+        cmSection.put(key, cmSection.existingValues.getOrDefault(key, defaultOption));
     }
 
     @Override
@@ -84,7 +90,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         String oldKey = oldPath.substring(oldPath.lastIndexOf('.') + 1);
         Object movingValue = oldCmSection.existingValues.get(oldKey);
         String newKey = newPath.substring(newPath.lastIndexOf('.') + 1);
-        newCmSection.actualValues.put(newKey, movingValue);
+        newCmSection.put(newKey, movingValue);
         oldCmSection.set(oldKey, null);
     }
 
@@ -172,13 +178,13 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     private void forceExistingIntoActual() {
         if (!getParent().isNew()) {
-            actualValues.clear();
+            clear();
         }
         for (String key : existingValues.keySet()) {
             if (existingValues.get(key) instanceof CMConfigSection) {
                 ((CMConfigSection) existingValues.get(key)).forceExistingIntoActual();
             }
-            actualValues.put(key, existingValues.get(key));
+            put(key, existingValues.get(key));
         }
     }
 
@@ -197,12 +203,12 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         String[] sections = path.split("\\.");
         CMConfigSection toEdit = this;
         for (String section : sections) {
-            Object option = toEdit.actualValues.get(section);
+            Object option = toEdit.get(section);
             if (option == null) {
                 option = new CMConfigSection(
                         toEdit.getPath().length() == 0 ? section : toEdit.getPath() + "." + section,
                         toEdit.getParent());
-                toEdit.actualValues.put(section, option);
+                toEdit.put(section, option);
                 toEdit = (CMConfigSection) option;
             } else if (option instanceof CMConfigSection) {
                 toEdit = (CMConfigSection) option;
@@ -215,11 +221,11 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     protected Map<String, Object> convertToMap() {
         LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-        for (String path : actualValues.keySet()) {
-            if (actualValues.get(path) instanceof CMConfigSection) {
-                map.put(path, ((CMConfigSection) actualValues.get(path)).convertToMap());
+        for (String path : keySet()) {
+            if (get(path) instanceof CMConfigSection) {
+                map.put(path, ((CMConfigSection) get(path)).convertToMap());
             } else {
-                map.put(path, actualValues.get(path));
+                map.put(path, get(path));
             }
         }
         return map;
@@ -246,9 +252,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     protected void addDefaults(HashMap<String, Object> map) {
-        for (String key : actualValues.keySet()) {
-            if (actualValues.get(key) instanceof CMConfigSection) {
-                ((CMConfigSection) actualValues.get(key)).addDefaults(map);
+        for (String key : keySet()) {
+            if (get(key) instanceof CMConfigSection) {
+                ((CMConfigSection) get(key)).addDefaults(map);
             } else {
                 map.put(getPathWithKey(key), defaults.get(key));
             }
