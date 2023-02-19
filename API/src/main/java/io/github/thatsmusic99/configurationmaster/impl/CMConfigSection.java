@@ -2,6 +2,8 @@ package io.github.thatsmusic99.configurationmaster.impl;
 
 import io.github.thatsmusic99.configurationmaster.api.ConfigFile;
 import io.github.thatsmusic99.configurationmaster.api.ConfigSection;
+import io.github.thatsmusic99.configurationmaster.api.comments.Comment;
+import io.github.thatsmusic99.configurationmaster.api.comments.Section;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,37 +35,34 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = getKey(path);
         // Move comments to parent option
-        List<String> comments = new ArrayList<>(getParent().getPendingComments());
-        String parentSection = path.substring(0, path.indexOf('.') == -1 ? path.length() : path.indexOf('.'));
-        addComments(parentSection, comments.toArray(new String[]{}));
+        List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
+
+        for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
         comments.clear();
+
         // Then handle the comments for the actual option
-        if (getParent().getComments().containsKey(fullPath)) {
-            comments.add(getParent().getComments().get(fullPath));
-        }
-        // TODO - should probably be done using objects
-        if (section != null) {
-            comments.add("CONFIG_SECTION: " + section);
-        }
-        if (comment != null) {
-            comments.add(comment);
-        }
+        if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
+
+        // Add the section
+        if (section != null) comments.add(new Section(section));
+
+        // Add the comment
+        if (comment != null) comments.add(new Comment(comment));
+
+        // Clear any pending comments
         getParent().getPendingComments().clear();
-        if (comments.size() > 0) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(comments.get(0));
-            for (int i = 1; i < comments.size(); i++) {
-                builder.append("\n\n").append(comments.get(i));
-            }
-            getParent().getComments().put(fullPath, builder.toString());
-        }
+
+        // If there's comments to add,
+        if (comments.size() > 0) getParent().getComments().put(fullPath, comments);
+
+        // Add the defaults
         cmSection.defaults.put(key, defaultOption);
         cmSection.actualValues.put(key, cmSection.existingValues.getOrDefault(key, defaultOption));
     }
 
     @Override
     public void addComment(@NotNull String comment) {
-        getParent().getPendingComments().add(comment);
+        getParent().getPendingComments().add(new Comment(comment));
     }
 
     @Override
@@ -95,10 +94,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Objects.requireNonNull(comment, "The comment cannot be null!");
         // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
         if (getParent().getComments().containsKey(path)) {
-            String newComment = getParent().getComments().get(path) + "\n\n" + comment;
-            getParent().getComments().put(getPathWithKey(path), newComment);
+            getParent().getComments().get(path).add(new Comment(comment));
         } else {
-            getParent().getComments().put(getPathWithKey(path), comment);
+            getParent().getComments().put(getPathWithKey(path), new ArrayList<>(Collections.singletonList(new Comment(comment))));
         }
     }
 
@@ -107,13 +105,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Objects.requireNonNull(path, "The path cannot be null!");
         Objects.requireNonNull(comments, "The comments array cannot be null!");
 
-        if (comments.length == 0) return;
-        StringBuilder builder = new StringBuilder();
-        builder.append(comments[0]);
-        for (int i = 1; i < comments.length; i++) {
-            builder.append("\n\n").append(comments[i]);
-        }
-        addComment(path, builder.toString());
+        for (String comment : comments) addComment(path, comment);
     }
 
     @Override
@@ -192,8 +184,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addSection(@NotNull String section) {
-        // TODO - use objects
-        getParent().getPendingComments().add("CONFIG_SECTION: " + section);
+        getParent().getPendingComments().add(new Section(section));
     }
 
     protected CMConfigSection createSectionInternal(@NotNull String path) {
