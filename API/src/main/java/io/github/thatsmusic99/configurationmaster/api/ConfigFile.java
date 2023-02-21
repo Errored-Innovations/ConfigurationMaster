@@ -1,6 +1,7 @@
 package io.github.thatsmusic99.configurationmaster.api;
 
 import io.github.thatsmusic99.configurationmaster.annotations.Option;
+import io.github.thatsmusic99.configurationmaster.annotations.OptionHandler;
 import io.github.thatsmusic99.configurationmaster.api.comments.Comment;
 import io.github.thatsmusic99.configurationmaster.impl.CMConfigSection;
 import org.jetbrains.annotations.NotNull;
@@ -174,12 +175,21 @@ public class ConfigFile extends CMConfigSection {
             final String name = option.path().isEmpty() ? optionNameTranslator.apply(field.getName()) : option.path();
             final String comment = option.comment().isEmpty() ? null : option.comment();
             final String section = option.section().isEmpty() ? null : option.section();
+            final boolean lenient = option.lenient();
+            final Class<? extends OptionHandler> optionHandlerClass = option.optionHandler();
+            OptionHandler handler = optionHandlerClass.getConstructor().newInstance();
+
+            // If it's a lenient field, then make it lenient
+            if (lenient) {
+                if (comment != null) addComment(name, comment);
+                makeSectionLenient(name);
+            }
 
             // Add the default
-            addDefault(name, defaultOpt, section, comment);
+            handler.addDefault(this, name, defaultOpt, section, comment);
 
             // Set the result
-            field.set(this, get(name));
+            field.set(this, handler.get(this, name));
         });
     }
 

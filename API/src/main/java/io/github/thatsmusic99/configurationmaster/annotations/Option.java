@@ -1,6 +1,8 @@
 package io.github.thatsmusic99.configurationmaster.annotations;
 
 
+import io.github.thatsmusic99.configurationmaster.annotations.handlers.DefaultOptionHandler;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,4 +17,8 @@ public @interface Option {
     String comment() default "";
 
     String section() default "";
+
+    boolean lenient() default false;
+
+    Class<? extends OptionHandler> optionHandler() default DefaultOptionHandler.class;
 }
