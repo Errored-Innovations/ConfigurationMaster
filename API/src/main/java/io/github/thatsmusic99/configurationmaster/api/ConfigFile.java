@@ -246,13 +246,8 @@ public class ConfigFile extends CMConfigSection {
 
         // Reset internal values
         existingValues.clear();
+        comments.clear();
         clear();
-
-        // Reset content
-        String content = readFileContent();
-        loadFromString(content);
-        addDefaults();
-        moveToNew();
 
         //
         for (String path : allDefaults.keySet()) {
@@ -265,8 +260,8 @@ public class ConfigFile extends CMConfigSection {
             makeSectionLenient(section);
         }
 
-        save();
-        postSave();
+        // Try loading
+        load();
     }
 
     /**
