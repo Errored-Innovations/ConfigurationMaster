@@ -7,6 +7,7 @@ import io.github.thatsmusic99.configurationmaster.impl.CMConfigSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -47,7 +48,7 @@ public class ConfigFile extends CMConfigSection {
 
     @NotNull private final Yaml yaml;
     @NotNull protected final DumperOptions yamlOptions = new DumperOptions();
-    @NotNull protected final Representer yamlRepresenter = new Representer();
+    @NotNull protected final Representer yamlRepresenter = new Representer(yamlOptions);
     @NotNull private final File file;
     @NotNull private final CommentWriter writer;
     @NotNull protected List<Comment> pendingComments;
@@ -74,7 +75,7 @@ public class ConfigFile extends CMConfigSection {
     public ConfigFile(@NotNull File file, @NotNull Function<String, String> optionNameTranslator) throws IOException, IllegalAccessException {
 
         // Load the YAML configuration
-        yaml = new Yaml(new SafeConstructor(), yamlRepresenter, yamlOptions);
+        yaml = new Yaml(new SafeConstructor(new LoaderOptions()), yamlRepresenter, yamlOptions);
         yamlOptions.setIndent(2);
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
