@@ -1,5 +1,6 @@
 package io.github.thatsmusic99.configurationmaster.api;
 
+import io.github.thatsmusic99.configurationmaster.annotations.Example;
 import io.github.thatsmusic99.configurationmaster.annotations.Option;
 import io.github.thatsmusic99.configurationmaster.annotations.OptionHandler;
 import io.github.thatsmusic99.configurationmaster.api.comments.Comment;
@@ -178,6 +179,11 @@ public class ConfigFile extends CMConfigSection {
             final boolean lenient = option.lenient();
             final Class<? extends OptionHandler> optionHandlerClass = option.optionHandler();
             OptionHandler handler = optionHandlerClass.getConstructor().newInstance();
+
+            // If there's examples to add, add them
+            for (Example example : field.getAnnotationsByType(Example.class)) {
+                addExample(name + "." + example.key(), example.value());
+            }
 
             // If it's a lenient field, then make it lenient
             if (lenient) {
