@@ -117,7 +117,7 @@ public class ConfigFile extends CMConfigSection {
      */
     public static ConfigFile loadConfig(File file) throws Exception {
         ConfigFile configFile = new ConfigFile(file);
-        configFile.load();
+        configFile.loadContent();
         return configFile;
     }
 
@@ -134,15 +134,7 @@ public class ConfigFile extends CMConfigSection {
         }
 
         // Read the file content
-        String content = readFileContent();
-
-        // Load any options from the content
-        loadFromString(content);
-
-        // Dump in lenient sections, if there are any
-        for (String section : lenientSections) {
-            makeSectionLenient(section);
-        }
+        loadContent();
 
         // Load the default options
         addDefaults();
@@ -219,6 +211,10 @@ public class ConfigFile extends CMConfigSection {
         });
     }
 
+    public void loadContent() throws IOException {
+        loadFromString(readFileContent());
+    }
+
     public void moveToNew() {
     }
 
@@ -275,7 +271,10 @@ public class ConfigFile extends CMConfigSection {
         existingValues.clear();
         clear();
 
-        //
+        // Load file content
+        loadContent();
+
+        // Add defaults
         for (String path : allDefaults.keySet()) {
 
             // Make sure it's not in a lenient section
@@ -286,9 +285,17 @@ public class ConfigFile extends CMConfigSection {
                 addDefault(path, allDefaults.get(path));
             }
         }
+        addDefaults();
 
-        // Try loading
-        load();
+        // Dump in lenient sections, if there are any
+        for (String section : lenientSections) {
+            makeSectionLenient(section);
+        }
+
+        moveToNew();
+        save();
+        postSave();
+
         reloading = false;
     }
 
