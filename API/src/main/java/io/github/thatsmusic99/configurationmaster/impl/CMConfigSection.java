@@ -125,22 +125,33 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     }
 
     @Override
-    public void addExample(@NotNull String path, Object object, String comment) {
+    public void addExample(@NotNull String path, Object object, @Nullable String comment) {
         Objects.requireNonNull(path, "The path cannot be null!");
 
-        if (!getParent().isNew()) {
-            CMMemorySection section = getSectionInternal(path);
-            if (section == null) {
-                getParent().getExamples().add(getPathWithKey(path));
-                return;
-            }
-            String key = getKey(path);
-            if (!section.existingValues.containsKey(key)) {
-                getParent().getExamples().add(getPathWithKey(path));
-                return;
-            }
+        // See if the base section exists - if not, force it
+        CMMemorySection section = getSectionInternal(path);
+        if (section == null) {
+            forceExample(path, object, comment);
+            return;
         }
-        forceExample(path, object, comment);
+
+        CMMemorySection parentSection = getSectionInternal(section.path);
+        if (parentSection != null && !parentSection.existingValues.containsKey(parentSection.getKey(section.path))) {
+            forceExample(path, object, comment);
+            return;
+        }
+
+        // If the section is lenient, then force the value into existing values
+        /* int finalIndex = path.lastIndexOf('.');
+        if (finalIndex != -1) {
+            String parentPath = path.substring(0, finalIndex);
+            if (getParent().getLenientSections().contains(parentPath)) {
+                section.put(getKey(path), object);
+                return;
+            }
+        } */
+
+        getParent().getExamples().add(getPathWithKey(path));
     }
 
     @Override
@@ -148,13 +159,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         Objects.requireNonNull(path, "The path cannot be null!");
 
         getParent().getExamples().add(getPathWithKey(path));
-        if (!getParent().isNew()) {
-            CMMemorySection section = (CMMemorySection) getConfigSection(path);
-            if (section == null) return;
-            String key = getKey(path);
-            if (!section.existingValues.containsKey(key)) return;
-        }
-        createConfigSection(path);
+        // See if the base section exists - if not, force it
+        CMMemorySection section = getSectionInternal(path);
+        if (section == null) createConfigSection(path);
     }
 
     @Override
@@ -179,11 +186,33 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         section.forceExistingIntoActual();
         if (getParent().getLenientSections().contains(getPathWithKey(path))) return;
         getParent().getLenientSections().add(getPathWithKey(path));
+
+        // Add it as a default option to the parent section
+        CMConfigSection parent = (CMConfigSection) getSectionInternal(path);
+        String key = getKey(path);
+        if (parent != null) parent.defaults.put(key, new CMConfigSection(parent.getPathWithKey(key), getParent()));
+
+        // Check for any pending comments
+        if (getParent().isReloading()) return;
+        String fullPath = getPathWithKey(path);
+        List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
+
+        for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
+        comments.clear();
+
+        // Then handle the comments for the actual option
+        if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
+
+        // Clear any pending comments
+        getParent().getPendingComments().clear();
+
+        // If there's comments to add,
+        if (comments.size() > 0) getParent().getComments().put(fullPath, comments);
     }
 
     private void forceExistingIntoActual() {
         if (!getParent().isNew()) {
-            clear();
+        //    clear();
         }
         for (String key : existingValues.keySet()) {
             if (existingValues.get(key) instanceof CMConfigSection) {
@@ -250,6 +279,14 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
                 existingValues.put(key, value);
             }
         }
+    }
+
+    protected String getParentPath(String path) {
+        int finalIndex = path.lastIndexOf('.');
+        if (finalIndex != -1) {
+            return path.substring(0, finalIndex);
+        }
+        return null;
     }
 
     private String getPathWithKey(String key) {

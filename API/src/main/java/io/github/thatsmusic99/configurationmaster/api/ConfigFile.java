@@ -3,6 +3,7 @@ package io.github.thatsmusic99.configurationmaster.api;
 import io.github.thatsmusic99.configurationmaster.annotations.Example;
 import io.github.thatsmusic99.configurationmaster.annotations.Option;
 import io.github.thatsmusic99.configurationmaster.annotations.OptionHandler;
+import io.github.thatsmusic99.configurationmaster.annotations.handlers.*;
 import io.github.thatsmusic99.configurationmaster.api.comments.Comment;
 import io.github.thatsmusic99.configurationmaster.impl.CMConfigSection;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
@@ -47,9 +49,8 @@ import java.util.logging.Logger;
  */
 public class ConfigFile extends CMConfigSection {
 
+    @NotNull private static final HashMap<Class<?>, Class<? extends OptionHandler>> REGISTERED_HANDLERS = new HashMap<>();
     @NotNull private final Yaml yaml;
-    @NotNull protected final DumperOptions yamlOptions = new DumperOptions();
-    @NotNull protected final Representer yamlRepresenter = new Representer(yamlOptions);
     @NotNull private final File file;
     @NotNull private final CommentWriter writer;
     @NotNull protected List<Comment> pendingComments;
@@ -62,6 +63,18 @@ public class ConfigFile extends CMConfigSection {
     protected boolean verbose;
     protected boolean reloading;
     protected static Logger logger = new CMLogger();
+
+    static {
+        REGISTERED_HANDLERS.put(boolean.class, BooleanOptionHandler.class);
+        REGISTERED_HANDLERS.put(Boolean.class, BooleanOptionHandler.class);
+        REGISTERED_HANDLERS.put(float.class, FloatOptionHandler.class);
+        REGISTERED_HANDLERS.put(Float.class, FloatOptionHandler.class);
+        REGISTERED_HANDLERS.put(int.class, IntegerOptionHandler.class);
+        REGISTERED_HANDLERS.put(Integer.class, IntegerOptionHandler.class);
+        REGISTERED_HANDLERS.put(long.class, LongOptionHandler.class);
+        REGISTERED_HANDLERS.put(Long.class, LongOptionHandler.class);
+        REGISTERED_HANDLERS.put(String.class, StringOptionHandler.class);
+    }
 
     /**
      * Used to initialise a config file without safety precautions taken by the API.
@@ -77,10 +90,7 @@ public class ConfigFile extends CMConfigSection {
     public ConfigFile(@NotNull File file, @NotNull Function<String, String> optionNameTranslator) throws IOException, IllegalAccessException {
 
         // Load the YAML configuration
-        yaml = new Yaml(new SafeConstructor(new LoaderOptions()), yamlRepresenter, yamlOptions);
-        yamlOptions.setIndent(2);
-        yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        yaml = getYaml();
 
         // Set up the file itself
         this.file = file;
@@ -128,6 +138,11 @@ public class ConfigFile extends CMConfigSection {
 
         // Load any options from the content
         loadFromString(content);
+
+        // Dump in lenient sections, if there are any
+        for (String section : lenientSections) {
+            makeSectionLenient(section);
+        }
 
         // Load the default options
         addDefaults();
@@ -179,7 +194,10 @@ public class ConfigFile extends CMConfigSection {
             final String comment = option.comment().isEmpty() ? null : option.comment();
             final String section = option.section().isEmpty() ? null : option.section();
             final boolean lenient = option.lenient();
-            final Class<? extends OptionHandler> optionHandlerClass = option.optionHandler();
+            Class<? extends OptionHandler> optionHandlerClass = option.optionHandler();
+            if (optionHandlerClass == DefaultOptionHandler.class) {
+                optionHandlerClass = REGISTERED_HANDLERS.getOrDefault(field.getType(), DefaultOptionHandler.class);
+            }
             OptionHandler handler = optionHandlerClass.getConstructor().newInstance();
 
             // If there's examples to add, add them
@@ -194,7 +212,7 @@ public class ConfigFile extends CMConfigSection {
             }
 
             // Add the default
-            handler.addDefault(this, name, defaultOpt, section, comment);
+            if (defaultOpt != null) handler.addDefault(this, name, defaultOpt, section, comment);
 
             // Set the result
             field.set(this, handler.get(this, name));
@@ -255,18 +273,18 @@ public class ConfigFile extends CMConfigSection {
 
         // Reset internal values
         existingValues.clear();
-        comments.clear();
         clear();
 
         //
         for (String path : allDefaults.keySet()) {
+
+            // Make sure it's not in a lenient section
+            String parentPath = getParentPath(path);
+            if (lenientSections.contains(parentPath)) continue;
+
             if (!examples.contains(path) || contains(path) || isNew) {
                 addDefault(path, allDefaults.get(path));
             }
-        }
-
-        for (String section : lenientSections) {
-            makeSectionLenient(section);
         }
 
         // Try loading
@@ -383,6 +401,44 @@ public class ConfigFile extends CMConfigSection {
 
     public void debug(String message) {
         if (verbose) logger.info(message);
+    }
+
+    private Yaml getYaml() {
+
+        // Initialise dump options
+        DumperOptions options = new DumperOptions();
+        options.setIndent(2);
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+        // Initialise representer
+        Representer representerClone;
+        try {
+            representerClone = new Representer(options);
+        } catch (NoSuchMethodError ex) {
+            try {
+                representerClone = Representer.class.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        representerClone.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+        // Initialise YAML
+        Yaml yaml;
+        try {
+            yaml = new Yaml(new SafeConstructor(new LoaderOptions()), representerClone, options, new LoaderOptions());
+        } catch (Exception | NoSuchMethodError | NoClassDefFoundError ex) {
+            // YOLO
+            try {
+                yaml = new Yaml(SafeConstructor.class.getConstructor().newInstance(), representerClone, options);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return yaml;
     }
 
     private static class CMLogger extends Logger {
