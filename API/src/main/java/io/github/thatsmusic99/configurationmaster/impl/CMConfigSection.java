@@ -40,26 +40,29 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (cmSection == null) cmSection = createSectionInternal(path);
         String key = getKey(path);
 
-        // Move comments to parent option
-        List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
+        if (!getParent().isReloading()) {
 
-        for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
-        comments.clear();
+            // Move comments to parent option
+            List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
 
-        // Then handle the comments for the actual option
-        if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
+            for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
+            comments.clear();
 
-        // Add the section
-        if (section != null) comments.add(new Section(section));
+            // Then handle the comments for the actual option
+            if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
 
-        // Add the comment
-        if (comment != null) comments.add(new Comment(comment));
+            // Add the section
+            if (section != null) comments.add(new Section(section));
 
-        // Clear any pending comments
-        getParent().getPendingComments().clear();
+            // Add the comment
+            if (comment != null) comments.add(new Comment(comment));
 
-        // If there's comments to add,
-        if (comments.size() > 0) getParent().getComments().put(fullPath, comments);
+            // Clear any pending comments
+            getParent().getPendingComments().clear();
+
+            // If there's comments to add,
+            if (comments.size() > 0) getParent().getComments().put(fullPath, comments);
+        }
 
         // Add the defaults
         cmSection.defaults.put(key, defaultOption);
@@ -98,6 +101,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void addComment(@NotNull String path, @NotNull String comment) {
         Objects.requireNonNull(path, "The path cannot be null!");
         Objects.requireNonNull(comment, "The comment cannot be null!");
+        if (getParent().isReloading()) return;
         // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
         if (getParent().getComments().containsKey(path)) {
             getParent().getComments().get(path).add(new Comment(comment));
@@ -190,6 +194,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addSection(@NotNull String section) {
+        if (getParent().isReloading()) return;
         getParent().getPendingComments().add(new Section(section));
     }
 

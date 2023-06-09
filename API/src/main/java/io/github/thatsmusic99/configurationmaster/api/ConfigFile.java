@@ -60,6 +60,7 @@ public class ConfigFile extends CMConfigSection {
     @Nullable private Title title;
     private boolean isNew;
     protected boolean verbose;
+    protected boolean reloading;
     protected static Logger logger = new CMLogger();
 
     /**
@@ -85,6 +86,7 @@ public class ConfigFile extends CMConfigSection {
         this.file = file;
         this.optionNameTranslator = optionNameTranslator;
         this.isNew = false;
+        this.reloading = false;
         this.title = null;
 
         // Set up internal variables
@@ -245,6 +247,7 @@ public class ConfigFile extends CMConfigSection {
      */
     public void reload() throws Exception {
         debug("Reloading the configuration file " + file.getName() + "...");
+        reloading = true;
 
         // Reset the defaults
         HashMap<String, Object> allDefaults = new LinkedHashMap<>();
@@ -268,6 +271,7 @@ public class ConfigFile extends CMConfigSection {
 
         // Try loading
         load();
+        reloading = false;
     }
 
     /**
@@ -279,6 +283,10 @@ public class ConfigFile extends CMConfigSection {
      */
     public boolean isNew() {
         return isNew;
+    }
+
+    public boolean isReloading() {
+        return reloading;
     }
 
     public void updateAnnotations() throws Exception {
