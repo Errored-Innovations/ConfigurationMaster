@@ -71,6 +71,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addComment(@NotNull String comment) {
+        if (getParent().isReloading()) return;
         getParent().getPendingComments().add(new Comment(comment));
     }
 
