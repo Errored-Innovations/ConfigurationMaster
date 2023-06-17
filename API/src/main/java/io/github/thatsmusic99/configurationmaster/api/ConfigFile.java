@@ -289,18 +289,16 @@ public class ConfigFile extends CMConfigSection {
 
             // Make sure it's not in a lenient section
             String parentPath = getParentPath(path);
-            if (lenientSections.contains(parentPath)) continue;
+            if (lenientSections.contains(parentPath)) {
+                makeSectionLenient(parentPath);
+                continue;
+            }
 
             if (!examples.contains(path) || contains(path) || isNew) {
                 addDefault(path, allDefaults.get(path));
             }
         }
         addDefaults();
-
-        // Dump in lenient sections, if there are any
-        for (String section : lenientSections) {
-            makeSectionLenient(section);
-        }
 
         moveToNew();
         save();
