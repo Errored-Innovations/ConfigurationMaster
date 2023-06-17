@@ -212,7 +212,7 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     private void forceExistingIntoActual() {
         if (!getParent().isNew()) {
-        //    clear();
+            clear();
         }
         for (String key : existingValues.keySet()) {
             if (existingValues.get(key) instanceof CMConfigSection) {
