@@ -117,6 +117,7 @@ public class ConfigFile extends CMConfigSection {
      */
     public static ConfigFile loadConfig(File file) throws Exception {
         ConfigFile configFile = new ConfigFile(file);
+        configFile.createFile();
         configFile.loadContent();
         return configFile;
     }
@@ -124,14 +125,7 @@ public class ConfigFile extends CMConfigSection {
     public void load() throws Exception {
 
         // If the file doesn't already exist, create it
-        if (!file.exists()) {
-            if (!file.createNewFile()) {
-                throw new IOException("Failed to create " + file.getName() + "!");
-            }
-
-            // It's a new file
-            isNew = true;
-        }
+        createFile();
 
         // Read the file content
         loadContent();
@@ -267,15 +261,8 @@ public class ConfigFile extends CMConfigSection {
         HashMap<String, Object> allDefaults = new LinkedHashMap<>();
         addDefaults(allDefaults);
 
-        // If the file doesn't already exist, create it
-        if (!file.exists()) {
-            if (!file.createNewFile()) {
-                throw new IOException("Failed to create " + file.getName() + "!");
-            }
-
-            // It's a new file
-            isNew = true;
-        }
+        // Create the file
+        createFile();
 
         // Reset internal values
         existingValues.clear();
@@ -320,6 +307,19 @@ public class ConfigFile extends CMConfigSection {
 
     public boolean isReloading() {
         return reloading;
+    }
+
+    protected void createFile() throws IOException {
+
+        // If the file doesn't already exist, create it
+        if (!file.exists()) {
+            if (!file.createNewFile()) {
+                throw new IOException("Failed to create " + file.getName() + "!");
+            }
+
+            // It's a new file
+            isNew = true;
+        }
     }
 
     public void updateAnnotations() throws Exception {
