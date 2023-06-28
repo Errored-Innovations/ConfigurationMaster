@@ -128,28 +128,22 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void addExample(@NotNull String path, Object object, @Nullable String comment) {
         Objects.requireNonNull(path, "The path cannot be null!");
 
-        // See if the base section exists - if not, force it
-        CMMemorySection section = getSectionInternal(path);
-        if (section == null) {
-            forceExample(path, object, comment);
-            return;
-        }
+        // Check if any of the sections are lenient
+        String[] sections = path.split("\\.");
+        List<String> visited = new ArrayList<>();
+        for (String section : sections) {
+            visited.add(section);
+            String parentPath = String.join(".", visited);
 
-        CMMemorySection parentSection = getSectionInternal(section.path);
-        if (parentSection != null && !parentSection.existingValues.containsKey(parentSection.getKey(section.path))) {
-            forceExample(path, object, comment);
-            return;
-        }
-
-        // If the section is lenient, then force the value into existing values
-        /* int finalIndex = path.lastIndexOf('.');
-        if (finalIndex != -1) {
-            String parentPath = path.substring(0, finalIndex);
+            // If it's lenient, check if it exists
             if (getParent().getLenientSections().contains(parentPath)) {
-                section.put(getKey(path), object);
-                return;
+                CMConfigSection parentSection = (CMConfigSection) getSectionInternal(parentPath, false);
+                if (parentSection == null || parentSection.existingValues.get(section) == null) {
+                    forceExample(path, object, comment);
+                    return;
+                }
             }
-        } */
+        }
 
         getParent().getExamples().add(getPathWithKey(path));
     }
@@ -301,6 +295,11 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             } else {
                 map.put(getPathWithKey(key), defaults.get(key));
             }
+        }
+
+        // If the section is empty but lenient, keep it
+        if (getParent().getLenientSections().contains(getPath()) && keySet().size() == 0) {
+            map.put(getPath(), this);
         }
     }
 }
