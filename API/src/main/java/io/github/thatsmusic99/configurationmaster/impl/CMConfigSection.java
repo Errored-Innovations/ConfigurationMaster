@@ -45,7 +45,13 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
             // Move comments to parent option
             List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
 
-            for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
+            for (Comment pendingComment : comments) {
+                if (pendingComment instanceof Section) {
+                    addSection(path, pendingComment.getComment());
+                } else {
+                    addComment(path, pendingComment.getComment());
+                }
+            }
             comments.clear();
 
             // Then handle the comments for the actual option
@@ -220,6 +226,20 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
     public void addSection(@NotNull String section) {
         if (getParent().isReloading()) return;
         getParent().getPendingComments().add(new Section(section));
+    }
+
+    @Override
+    public void addSection(@NotNull String path, @NotNull String section) {
+        Objects.requireNonNull(path, "The path cannot be null!");
+        Objects.requireNonNull(section, "The section cannot be null!");
+
+        if (getParent().isReloading()) return;
+        // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
+        if (getParent().getComments().containsKey(path)) {
+            getParent().getComments().get(path).add(new Section(section));
+        } else {
+            getParent().getComments().put(getPathWithKey(path), new ArrayList<>(Collections.singletonList(new Section(section))));
+        }
     }
 
     protected CMConfigSection createSectionInternal(@NotNull String path) {

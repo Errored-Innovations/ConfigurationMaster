@@ -34,6 +34,8 @@ public interface ConfigSection extends MemorySection {
 
     void addSection(@NotNull String section);
 
+    void addSection(@NotNull String path, @NotNull String section);
+
     void addExample(@NotNull String path, @Nullable Object value);
 
     void addExample(@NotNull String path, @Nullable Object value, @Nullable String comment);
