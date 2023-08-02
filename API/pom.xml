@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ConfigurationMaster-API</artifactId>
-    <version>v2.0.0-BETA-9</version>
+    <version>v2.0.0-BETA-10</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
