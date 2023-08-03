@@ -444,7 +444,7 @@ public class ConfigFile extends CMConfigSection {
         try {
             LoaderOptions loader = new LoaderOptions();
             loader.setCodePointLimit(1024 * 1024 * 100);
-            yaml = new Yaml(new SafeConstructor(loader), representerClone, options, new LoaderOptions());
+            yaml = new Yaml(new SafeConstructor(loader), representerClone, options, loader);
         } catch (Exception | NoSuchMethodError | NoClassDefFoundError ex) {
             // YOLO
             try {
