@@ -58,6 +58,7 @@ public class ConfigFile extends CMConfigSection {
     @NotNull protected HashSet<String> examples;
     @NotNull protected List<String> lenientSections;
     @NotNull protected Function<String, String> optionNameTranslator;
+    @NotNull protected List<String> permittedClasses;
     @Nullable private Title title;
     private boolean isNew;
     protected boolean verbose;
@@ -105,6 +106,7 @@ public class ConfigFile extends CMConfigSection {
         comments = new HashMap<>();
         examples = new HashSet<>();
         lenientSections = new ArrayList<>();
+        permittedClasses = new ArrayList<>();
     }
 
     /**
@@ -124,6 +126,9 @@ public class ConfigFile extends CMConfigSection {
 
     public void load() throws Exception {
 
+        // Before we do anything
+        preFileCreation();
+
         // If the file doesn't already exist, create it
         createFile();
 
@@ -141,6 +146,9 @@ public class ConfigFile extends CMConfigSection {
 
         // Carry out any extra operations post-save
         postSave();
+    }
+
+    public void preFileCreation() {
     }
 
     protected void loadFromString(String content) throws IOException {
@@ -444,6 +452,7 @@ public class ConfigFile extends CMConfigSection {
         try {
             LoaderOptions loader = new LoaderOptions();
             loader.setCodePointLimit(1024 * 1024 * 100);
+            loader.setTagInspector(tag -> this.permittedClasses.contains(tag.getClassName()));
             yaml = new Yaml(new SafeConstructor(loader), representerClone, options, loader);
         } catch (Exception | NoSuchMethodError | NoClassDefFoundError ex) {
             // YOLO
