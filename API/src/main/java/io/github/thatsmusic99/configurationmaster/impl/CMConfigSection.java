@@ -42,17 +42,9 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
         if (!getParent().isReloading()) {
 
-            // Move comments to parent option
-            List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
+            addPendingCommentsToPath(path);
 
-            for (Comment pendingComment : comments) {
-                if (pendingComment instanceof Section) {
-                    addSection(path, pendingComment.getComment());
-                } else {
-                    addComment(path, pendingComment.getComment());
-                }
-            }
-            comments.clear();
+            final List<Comment> comments = new ArrayList<>();
 
             // Then handle the comments for the actual option
             if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
@@ -106,9 +98,15 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addComment(@NotNull String path, @NotNull String comment) {
+        addComment(path, comment, true);
+    }
+
+    private void addComment(final @NotNull String path, final @NotNull String comment, final boolean addPending) {
         Objects.requireNonNull(path, "The path cannot be null!");
         Objects.requireNonNull(comment, "The comment cannot be null!");
         if (getParent().isReloading()) return;
+        if (addPending) addPendingCommentsToPath(path);
+
         // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
         if (getParent().getComments().containsKey(path)) {
             getParent().getComments().get(path).add(new Comment(comment));
@@ -195,10 +193,10 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         // Check for any pending comments
         if (getParent().isReloading()) return;
         String fullPath = getPathWithKey(path);
-        List<Comment> comments = new ArrayList<>(getParent().getPendingComments());
 
-        for (Comment pendingComment : comments) addComment(path, pendingComment.getComment());
-        comments.clear();
+        addPendingCommentsToPath(path);
+
+        final List<Comment> comments = new ArrayList<>();
 
         // Then handle the comments for the actual option
         if (getParent().getComments().containsKey(fullPath)) comments.addAll(getParent().getComments().get(fullPath));
@@ -230,10 +228,15 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
 
     @Override
     public void addSection(@NotNull String path, @NotNull String section) {
+        addSection(path, section, true);
+    }
+
+    private void addSection(final @NotNull String path, final @NotNull String section, final boolean addPending) {
         Objects.requireNonNull(path, "The path cannot be null!");
         Objects.requireNonNull(section, "The section cannot be null!");
 
         if (getParent().isReloading()) return;
+        if (addPending) addPendingCommentsToPath(path);
         // If a specified path already has comments, add this one onto the existing comment, otherwise just add it
         if (getParent().getComments().containsKey(path)) {
             getParent().getComments().get(path).add(new Section(section));
@@ -321,5 +324,21 @@ public class CMConfigSection extends CMMemorySection implements ConfigSection {
         if (getParent().getLenientSections().contains(getPath()) && keySet().size() == 0) {
             map.put(getPath(), this);
         }
+    }
+
+    private void addPendingCommentsToPath(final @NotNull String path) {
+
+        // Get the root path for pending commands
+        final int index = path.indexOf('.');
+        final String root = path.substring(0, index == -1 ? path.length() : index);
+
+        for (Comment pendingComment : getParent().getPendingComments()) {
+            if (pendingComment instanceof Section) {
+                addSection(root, pendingComment.getComment(), false);
+            } else {
+                addComment(root, pendingComment.getComment(), false);
+            }
+        }
+        getParent().getPendingComments().clear();
     }
 }
