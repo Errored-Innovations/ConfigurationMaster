@@ -180,6 +180,8 @@ public class ConfigFile extends CMConfigSection {
 
         handleAnnotations((field, option) -> {
 
+            if (!canProcessOption(field, option)) return;
+
             // Also get the field value and treat it as the default option
             final Object defaultOpt = field.get(this);
 
@@ -211,6 +213,10 @@ public class ConfigFile extends CMConfigSection {
             // Set the result
             field.set(this, handler.get(this, name));
         });
+    }
+
+    public boolean canProcessOption(final @NotNull Field field, final @NotNull Option option) {
+        return true;
     }
 
     public void loadContent() throws IOException {
