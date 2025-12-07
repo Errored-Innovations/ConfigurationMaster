@@ -19,14 +19,14 @@ To manage your dependencies, it is recommended to use either Maven or Gradle. In
     <repositories>
 	<repository>
 	    <id>cm-repo</id>
-	    <url>https://ci.pluginwiki.us/plugin/repository/everything/</url>
+	    <url>https://repo.bsdevelopment.org/releases/</url>
 	</repository>
     </repositories>
     <dependencies>
         <dependency>
             <groupId>com.github.thatsmusic99</groupId>
-	    <artifactId>ConfigurationMaster</artifactId>
-	    <version>v1.0.1</version>
+	    <artifactId>ConfigurationMaster-API</artifactId>
+	    <version>v2.0.0-rc.3</version>
 	</dependency>
     </dependencies>
 ```
